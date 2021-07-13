@@ -2430,16 +2430,16 @@
           }
         }
         let flag = true;
-        let res = '';
+        let res = "";
         for (let i = 0; i < re.length; i++) {
-          if (re[i] != '0') {
+          if (re[i] != "0") {
             flag = false;
             res += re[i];
-          } else if (re[i] == '0' && !flag) {
+          } else if (re[i] == "0" && !flag) {
             res += re[i];
           }
         }
-        return res
+        return res;
       };
     </script>
 
@@ -2457,6 +2457,7 @@
         Explanation: The first '*' matches the empty sequence, while the second '*' matches the substring "dce".
       */
 
+      // 递归加上记忆数组
       var isMatch = function (s, p) {
         if (s == p) {
           return true;
@@ -2515,7 +2516,19 @@
         Output: 2
         Explanation: The minimum number of jumps to reach the last index is 2.
             Jump 1 step from index 0 to 1, then 3 steps to the last index.
-        这题是之前那道 Jump Game 的延伸，那题是问能不能到达最后一个数字，而此题只让求到达最后一个位置的最少跳跃数，貌似是默认一定能到达最后位置的? 此题的核心方法是利用贪婪算法 Greedy 的思想来解，想想为什么呢？ 为了较快的跳到末尾，想知道每一步能跳的范围，这里贪婪并不是要在能跳的范围中选跳力最远的那个位置，因为这样选下来不一定是最优解，这么一说感觉又有点不像贪婪算法了。其实这里贪的是一个能到达的最远范围，遍历当前跳跃能到的所有位置，然后根据该位置上的跳力来预测下一步能跳到的最远距离，贪出一个最远的范围，一旦当这个范围到达末尾时，当前所用的步数一定是最小步数。需要两个变量 cur 和 pre 分别来保存当前的能到达的最远位置和之前能到达的最远位置，只要 cur 未达到最后一个位置则循环继续，pre 先赋值为 cur 的值，表示上一次循环后能到达的最远位置，如果当前位置i小于等于 pre，说明还是在上一跳能到达的范围内，根据当前位置加跳力来更新 cur，更新 cur 的方法是比较当前的 cur 和 i + A[i] 之中的较大值，如果题目中未说明是否能到达末尾，还可以判断此时 pre 和 cur 是否相等，如果相等说明 cur 没有更新，即无法到达末尾位置
+        这题是之前那道 Jump Game 的延伸，那题是问能不能到达最后一个数字，而此题只让求到达最后一个位置的最少跳跃数，
+        貌似是默认一定能到达最后位置的? 
+        此题的核心方法是利用贪婪算法 Greedy 的思想来解，想想为什么呢？ 
+        为了较快的跳到末尾，想知道每一步能跳的范围，这里贪婪并不是要在能跳的范围中选跳力最远的那个位置，
+        因为这样选下来不一定是最优解，这么一说感觉又有点不像贪婪算法了。
+        其实这里贪的是一个能到达的最远范围，遍历当前跳跃能到的所有位置，
+        然后根据该位置上的跳力来预测下一步能跳到的最远距离，贪出一个最远的范围，
+        一旦当这个范围到达末尾时，当前所用的步数一定是最小步数。
+        需要两个变量 cur 和 pre 分别来保存当前的能到达的最远位置和之前能到达的最远位置，
+        只要 cur 未达到最后一个位置则循环继续，pre 先赋值为 cur 的值，表示上一次循环后能到达的最远位置，
+        如果当前位置i小于等于 pre，说明还是在上一跳能到达的范围内，
+        根据当前位置加跳力来更新 cur，更新 cur 的方法是比较当前的 cur 和 i + A[i] 之中的较大值，
+        如果题目中未说明是否能到达末尾，还可以判断此时 pre 和 cur 是否相等，如果相等说明 cur 没有更新，即无法到达末尾位置
       */
 
       // 贪心算法
@@ -2538,6 +2551,9 @@
           return jumps;
         }
       };
+
+      // 贪心算法  获取当前范围内能够到达的最远距离
+      var jump = function (nums) {};
     </script>
 
     <script>
@@ -2649,6 +2665,7 @@
         ]
       */
 
+      // 排列顺序  可能会出现相同的   使用回溯加上map
       var permuteUnique = function (nums) {
         let re = [];
         let getRe = function (temp = [], index = Array(nums.length), obj = {}) {
@@ -2695,6 +2712,8 @@
           [9,6,3]
         ]
       */
+
+      // todo
       var rotate = function (matrix) {};
     </script>
 
@@ -2804,6 +2823,8 @@
           all = Math.abs(n),
           temp = x,
           sum = 1;
+
+        // 递增迭代逼近
         while (all) {
           if (count * 2 <= all) {
             temp *= temp;
@@ -2880,6 +2901,51 @@
           }
         };
         getRe();
+        return re;
+      };
+
+      // 解8皇后   回溯
+      var solveNQueens = function (n) {
+        const temp = [];
+        const re = [];
+        const judge = (arr, row, col) => {
+          for (let i = 0; i < col; i++) {
+            if (
+              arr[i] === row ||
+              Math.abs(arr[i] - row) === Math.abs(col - i)
+            ) {
+              return false;
+            }
+          }
+          return true;
+        };
+        // 竖向遍历
+        const getRe = (index, current) => {
+          if (index === n) {
+            re.push(
+              current.map((i) => {
+                return Array(current.length)
+                  .fill(0)
+                  .map((_, j) => (j === i ? "Q" : "."))
+                  .join("");
+              })
+            );
+          } else if (index < n) {
+            for (let i = 0; i < n; i++) {
+              if (!temp[i] && judge(current, i, index)) {
+                // 记录当前数字是否使用过  可以减少一些判断
+                temp[i] = true;
+                current.push(i);
+                getRe(index + 1, current);
+                current.pop();
+                temp[i] = false;
+              }
+            }
+          }
+        };
+
+        getRe(0, []);
+
         return re;
       };
     </script>
@@ -3006,9 +3072,12 @@
         能跳到n位置上的条件是:存在一个可以跳到的位置m,并且nums[m] + m >= n
         */
         var arr = Array(nums.length);
+
+        // 初始条件
         arr[0] = true;
         for (var i = 1; i < arr.length; i++) {
           arr[i] = false;
+          // 当前需要满足的条件
           for (var j = i - 1; j >= 0; j--) {
             if (arr[j] && nums[j] + j >= i) {
               arr[i] = true;
@@ -3079,6 +3148,18 @@
     <script>
       /*
       60. Permutation Sequence
+
+      Example:
+
+        Input: n = 3, k = 3
+          "123"
+          "132"
+          "213"
+          "231"
+          "312"
+          "321"
+        Output: "213"
+
       Example:
 
         Input: n = 4, k = 9
@@ -3122,6 +3203,33 @@
           }
         };
         getRe(str);
+        return re;
+      };
+
+      // 使用回溯
+      var getPermutation = function (n, k) {
+        let flag = true;
+        let re = "";
+        let count = 0;
+        let temp = Array(n);
+        const getRe = (current) => {
+          if (current.length === n) {
+            count++;
+            if (count === k) {
+              re = current;
+              flag = false;
+            }
+          } else if (current.length < n && flag) {
+            for (let i = 0; i < n; i++) {
+              if (!temp[i]) {
+                temp[i] = 1;
+                getRe(current + (i + 1));
+                temp[i] = 0;
+              }
+            }
+          }
+        };
+        getRe("");
         return re;
       };
     </script>
@@ -3221,6 +3329,25 @@
         }
         return arr[n - 1][m - 1];
       };
+
+      // 一个 m * n的矩阵  从 0 0 开始到对角线终点  一共有多少种路径
+      // 每次出发选择右边或者下边
+      var uniquePaths = function (m, n) {
+        let arr = Array(m)
+          .fill(0)
+          .map((i) => Array(n));
+        for (let i = 0; i < m; i++) {
+          for (let j = 0; j < n; j++) {
+            if (i === 0 && j === 0) {
+              arr[i][j] = 1;
+            } else {
+              arr[i][j] = (i - 1 >= 0 ? arr[i - 1][j] : 0) + (j - 1 >= 0 ? arr[i][j - 1] : 0)
+            }
+          }
+        }
+
+        return arr[m-1][n-1];
+      };
     </script>
 
     <script>
@@ -3241,6 +3368,8 @@
         1. Right -> Right -> Down -> Down
         2. Down -> Down -> Right -> Right
       */
+
+      // 递归 + 记忆数组
       var uniquePathsWithObstacles = function (obstacleGrid) {
         let m = obstacleGrid.length - 1;
         let n = obstacleGrid[0].length - 1;
@@ -3299,6 +3428,8 @@
         }
         return arr[arr.length - 1][arr[0].length - 1];
       };
+
+      // 同一个思路
     </script>
 
     <script>
@@ -3310,6 +3441,8 @@
         Output: [1,2,4]
         Explanation: The array represents the integer 123.
       */
+
+      // 最后加 1 类似于字符串加法的处理
       var plusOne = function (digits) {
         var len = digits.length - 1,
           last = 1;
@@ -3336,6 +3469,8 @@
         Input: a = "1010", b = "1011"
         Output: "10101"
       */
+
+      // 二进制加法 和字符串加法的方式一致 使用额外的变量记录进位
       var addBinary = function (a, b) {
         var re = "",
           i = a.length - 1,
@@ -3405,6 +3540,8 @@
         };
         return getRe(0, x);
       };
+
+      // 本质和pow一个意思
     </script>
 
     <script>
@@ -3451,6 +3588,8 @@
         };
         return toTop(0, {}, {});
       };
+
+      // 典型的递归问题
     </script>
 
     <script>

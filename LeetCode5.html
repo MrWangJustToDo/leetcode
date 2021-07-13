@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode题解</title>
+    <script src="./List.js"></script>
+
+    <script>
+      /*
+    401. Binary Watch
+    Example:
+
+      Input: n = 1
+      Return: ["1:00", "2:00", "4:00", "8:00", "0:01", "0:02", "0:04", "0:08", "0:16", "0:32"]
+    */
+      var readBinaryWatch = function (num) {};
+    </script>
+
+    <script>
+      /*
+    402. Remove K Digits
+    Example:
+
+      Input: num = "1432219", k = 3
+      Output: "1219"
+      Explanation: Remove the three digits 4, 3, and 2 to form the new number 1219 which is the smallest.
+      55356
+      12321
+    */
+      // 使用正则优化以下
+      var removeKdigits = function (num, k) {
+        let getRe = function (num, k) {
+          num = num.replace(/^[0]+/, "");
+          if (num == "") {
+            return "0";
+          } else {
+            if (k == 0) {
+              return num;
+            } else {
+              let i = 0;
+              while (i + 1 < num.length && num[i] <= num[i + 1]) {
+                i++;
+              }
+              return getRe(num.substring(0, i) + num.substring(i + 1), k - 1);
+            }
+          }
+        };
+        return getRe(num, k);
+      };
+
+      var removeKdigits = function (num, k) {
+        let getRe = function (num, k) {
+          let i = 0;
+          while (num[i] == 0) {
+            i++;
+          }
+          if (i != 0 && i != num.length) {
+            num = num.substring(i);
+          }
+          if (k == 0) {
+            if (Number(num) == 0) {
+              return "0";
+            } else {
+              return num;
+            }
+          } else if (k > 0) {
+            i = 0;
+            while (i < num.length && num[i] <= num[i + 1]) {
+              i++;
+            }
+            return getRe(num.substring(0, i) + num.substring(i + 1), k - 1);
+          }
+        };
+        return getRe(num, k);
+      };
+    </script>
+
+    <script>
+      /*
+    403. Frog Jump
+    Example:
+
+      [0,1,3,5,6,8,12,17]
+
+      There are a total of 8 stones.
+      The first stone at the 0th unit, second stone at the 1st unit,
+      third stone at the 3rd unit, and so on...
+      The last stone at the 17th unit.
+
+      Return true. The frog can jump to the last stone by jumping 
+      1 unit to the 2nd stone, then 2 units to the 3rd stone, then 
+      2 units to the 4th stone, then 3 units to the 6th stone, 
+      4 units to the 7th stone, and 5 units to the 8th stone.
+    */
+      // 使用动态规划
+      var canCross = function (stones) {
+        let arr = Array(stones.length);
+        let t = Array(stones.length);
+        if (stones[1] != 1) {
+          return false;
+        }
+        arr[1] = [1];
+        t[1] = true;
+        for (let i = 2; i < arr.length; i++) {
+          arr[i] = [];
+          t[i] = false;
+          for (let j = i - 1; j >= 1; j--) {
+            let temp = stones[i] - stones[j];
+            if (
+              arr[j].includes(temp - 1) ||
+              arr[j].includes(temp) ||
+              arr[j].includes(temp + 1)
+            ) {
+              t[i] = true;
+              arr[i].push(temp);
+            } else {
+              if (i - j >= 4) {
+                break;
+              }
+            }
+          }
+        }
+        return t[stones.length - 1];
+      };
+
+      var canCross = function (stones) {
+        let obj = {};
+        for (let i = 0; i < stones.length; i++) {
+          obj[stones[i]] = 1;
+        }
+        let getRe = function (num = 0, count = 0, temp = {}) {
+          if (!(num in obj)) {
+            return false;
+          }
+          if (num == stones[stones.length - 1]) {
+            return true;
+          } else {
+            let key1 = num + count + ":" + count;
+            let key2 = num + count + 1 + ":" + (count + 1);
+            let key3 = num + count - 1 + ":" + (count - 1);
+            if (!(key2 in temp)) {
+              temp[key2] = getRe(num + count + 1, count + 1, temp);
+            }
+            if (count == 0) {
+              return temp[key2];
+            } else if (count > 0) {
+              if (!(key1 in temp)) {
+                temp[key1] = getRe(num + count, count, temp);
+              }
+              if (count > 1) {
+                if (!(key3 in temp)) {
+                  temp[key3] = getRe(num + count - 1, count - 1, temp);
+                }
+                return temp[key1] || temp[key2] || temp[key3];
+              } else {
+                return temp[key1] || temp[key2];
+              }
+            }
+          }
+        };
+        return getRe();
+      };
+    </script>
+
+    <script>
+      /*
+    404. Sum of Left Leaves
+          Example:
+
+          3
+         / \
+        9  20
+          /  \
+         15   7
+
+      There are two left leaves in the binary tree, with values 9 and 15 respectively. Return 24.
+    */
+      var sumOfLeftLeaves = function (root) {
+        let re = 0;
+        let getRe = function (node) {
+          if (node) {
+            if (node.left) {
+              if (!node.left.left && !node.left.right) {
+                re += node.left.val;
+              } else {
+                getRe(node.left);
+              }
+            }
+            if (node.right) {
+              getRe(node.right);
+            }
+          }
+        };
+        getRe(root);
+        return re;
+      };
+
+      var sumOfLeftLeaves = function (root) {
+        let re = 0;
+        let getAll = function (current) {
+          if (current && current.left) {
+            if (current.left.left == null && current.left.right == null) {
+              re += current.left.val;
+            } else {
+              getAll(current.left);
+            }
+          }
+          if (current && current.right) {
+            getAll(current.right);
+          }
+        };
+        getAll(root);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+    405. Convert a Number to Hexadecimal
+    Example:
+
+      Input:
+      -1
+
+      Output:
+      "ffffffff"
+    */
+      var toHex = function (num) {
+        function getNum(n) {
+          switch (n) {
+            case 15:
+              return "f";
+            case 14:
+              return "e";
+            case 13:
+              return "d";
+            case 12:
+              return "c";
+            case 11:
+              return "b";
+            case 10:
+              return "a";
+            default:
+              return n;
+          }
+        }
+        if (num < 0) {
+          num = Math.pow(2, 32) - Math.abs(num);
+        }
+        if (num == 0) {
+          return "0";
+        }
+        var str = "";
+        while (num > 0) {
+          var temp = num % 16;
+          str = getNum(temp) + str;
+          num = (num - temp) / 16;
+        }
+        return str;
+      };
+    </script>
+
+    <script>
+      /*
+    406. Queue Reconstruction by Height
+    Example
+
+      Input:
+      [[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]
+
+      Output:
+      [[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]]
+    */
+      var reconstructQueue = function (people) {
+        people.sort((o1, o2) => o1[0] - o2[0]);
+        let arr = Array(people.length);
+        let temp = [];
+        for (let i = 0; i < people.length; i++) {
+          if (people[i][1] == 0) {
+            temp.push(people[i]);
+            arr[i] = 1;
+            break;
+          }
+        }
+        let re = [],
+          flag = true;
+        let getRe = function (temp, arr) {
+          if (temp.length == people.length) {
+            re = Array.from(temp);
+            flag = false;
+          } else {
+            if (flag) {
+              for (let i = 0; i < people.length; i++) {
+                if (!arr[i] && people[i][1] <= temp.length) {
+                  let count = 0;
+                  for (let j = 0; j < temp.length; j++) {
+                    if (temp[j][0] >= people[i][0]) {
+                      count++;
+                    }
+                  }
+                  if (count == people[i][1]) {
+                    arr[i] = 1;
+                    temp.push(people[i]);
+                    getRe(temp, arr);
+                    temp.pop();
+                    arr[i] = 0;
+                  }
+                }
+              }
+            }
+          }
+        };
+        getRe(temp, arr);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+    409. Longest Palindrome
+    Example:
+
+      Input:
+      "abccccdd"
+
+      Output:
+      7
+
+      Explanation:
+      One longest palindrome that can be built is "dccaccd", whose length is 7.
+    */
+      var longestPalindrome = function (s) {
+        let obj = {};
+        for (let i = 0; i < s.length; i++) {
+          if (obj[s[i]]) {
+            obj[s[i]]++;
+          } else {
+            obj[s[i]] = 1;
+          }
+        }
+        let re = 0,
+          flag = true;
+        for (let t in obj) {
+          if ((obj[t] & 1) == 0) {
+            re += obj[t];
+          } else {
+            if (flag) {
+              re += obj[t];
+              flag = false;
+            } else {
+              re += obj[t] - 1;
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      410. Split Array Largest Sum
+      Example:
+
+        Input: nums = [7,2,5,10,8], m = 2
+        Output: 18
+        Explanation:
+        There are four ways to split nums into two subarrays.
+        The best way is to split it into [7,2,5] and [10,8],
+        where the largest sum among the two subarrays is only 18.
+      */
+      var splitArray = function (nums, m) {
+        if (m === nums.length) {
+          return Math.max(...nums);
+        } else {
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      412. Fizz Buzz
+      Example:
+
+        n = 15,
+
+        Return:
+        [
+            "1",
+            "2",
+            "Fizz",
+            "4",
+            "Buzz",
+            "Fizz",
+            "7",
+            "8",
+            "Fizz",
+            "Buzz",
+            "11",
+            "Fizz",
+            "13",
+            "14",
+            "FizzBuzz"
+        ]
+      */
+      var fizzBuzz = function (n) {
+        let re = [];
+        for (let i = 1; i <= n; i++) {
+          if (i % 3 == 0 && i % 5 == 0) {
+            re.push("FizzBuzz");
+          } else if (i % 3 == 0) {
+            re.push("Fizz");
+          } else if (i % 5 == 0) {
+            re.push("Buzz");
+          } else {
+            re.push(i);
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+    413. Arithmetic Slices
+    Example:
+
+      A = [1, 2, 3, 4]
+
+      return: 3, for 3 arithmetic slices in A: [1, 2, 3], [2, 3, 4] and [1, 2, 3, 4] itself.
+    */
+      var numberOfArithmeticSlices = function (A) {
+        // 统计不同数量能够组成三位数的总数
+        let arr = [];
+        arr[1] = 0;
+        arr[2] = 0;
+        arr[3] = 1;
+        for (let i = 4; i <= A.length; i++) {
+          arr[i] = 1 + 2 * arr[i - 1] - arr[i - 2];
+        }
+        let re = 0;
+        let getRe = function (start) {
+          if (start < A.length - 1) {
+            let t = A[start + 1] - A[start];
+            let i = start + 1;
+            while (i + 1 < A.length && A[i + 1] - A[i] == t) {
+              i++;
+            }
+            re += arr[i - start + 1];
+            getRe(i);
+          }
+        };
+        getRe(0);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+    414. Third Maximum Number
+    Example 3:
+      Input: [2, 2, 3, 1]
+
+      Output: 1
+
+      Explanation: Note that the third maximum here means the third maximum distinct number.
+      Both numbers with value 2 are both considered as second maximum.
+    */
+
+      var thirdMax = function (nums) {
+        let first = null,
+          second = null,
+          third = null;
+        nums.forEach((item) => {
+          if (first == null) {
+            first = item;
+          } else if (second == null) {
+            if (first != item) {
+              second = Math.min(item, first);
+              first = Math.max(item, first);
+            }
+          } else {
+            if (item > first) {
+              third = second;
+              second = first;
+              first = item;
+            } else if (item < first && item > second) {
+              third = second;
+              second = item;
+            } else if (item < second) {
+              if (third == null) {
+                third = item;
+              } else {
+                third = Math.max(third, item);
+              }
+            }
+          }
+        });
+        return third == null ? first : third;
+      };
+
+      var thirdMax = function (nums) {
+        let first,
+          second,
+          third = null;
+        for (let i = 0; i < nums.length; i++) {
+          if (!first) {
+            first = nums[i];
+          } else if (!second && !third) {
+            if (nums[i] > first) {
+              second = first;
+              first = nums[i];
+            } else if (first > nums[i]) {
+              second = nums[i];
+            }
+          } else if (!third) {
+            if (nums[i] < second) {
+              third = nums[i];
+            } else if (nums[i] > first) {
+              third = second;
+              second = first;
+              first = nums[i];
+            } else if (nums[i] < first && nums[i] > second) {
+              third = second;
+              second = nums[i];
+            }
+          } else {
+            if (nums[i] > first) {
+              third = second;
+              second = first;
+              first = nums[i];
+            } else if (nums[i] > second && nums[i] < first) {
+              third = second;
+              second = nums[i];
+            } else if (nums[i] < second && nums[i] > third) {
+              third = nums[i];
+            }
+          }
+        }
+        return third === null ? first : third;
+      };
+    </script>
+
+    <script>
+      /*
+    415. Add Strings
+      Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.
+    */
+      // 字符串加法
+      var addStrings = function (num1, num2) {
+        let re = "";
+        let temp = 0;
+        let l1 = num1.length - 1;
+        let l2 = num2.length - 1;
+        while (l1 >= 0 || l2 >= 0) {
+          let c =
+            (l1 >= 0 ? Number(num1[l1--]) : 0) +
+            (l2 >= 0 ? Number(num2[l2--]) : 0) +
+            temp;
+          if (c > 9) {
+            c %= 10;
+            temp = 1;
+          } else {
+            temp = 0;
+          }
+          re = c + re;
+        }
+        if (temp == 1) {
+          re = 1 + re;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      416. Partition Equal Subset Sum
+      Example:
+      
+        Input: [1, 5, 11, 5]
+      
+        Output: true
+      
+        Explanation: The array can be partitioned as [1, 5, 5] and [11].
+      */
+      var canPartition = function (nums) {
+        nums.sort((n1, n2) => n1 - n2);
+        let getRe = function (index, left, right, obj) {
+          obj[index + ":" + left + ":" + right] = 1;
+          if (index == nums.length) {
+            return left == right;
+          } else {
+            let flag = false;
+            let key1 = index + 1 + ":" + (left + nums[index]) + ":" + right;
+            let key2 = index + 1 + ":" + left + ":" + (right + nums[index]);
+            if (!obj[key1]) {
+              flag = flag || getRe(index + 1, left + nums[index], right, obj);
+            }
+            if (!obj[key2]) {
+              flag = flag || getRe(index + 1, left, rigth + nums[index], obj);
+            }
+            return flag;
+          }
+        };
+        return getRe(0, 0, 0, {});
+      };
+
+      // 使用动态规划
+      var canPartition = function (nums) {
+        let sum = 0;
+        nums.forEach((item) => (sum += item));
+        if ((sum & 1) == 1) {
+          return false;
+        }
+        sum /= 2;
+        let arr = Array(sum + 1);
+        arr[0] = true;
+        for (let num of nums) {
+          for (let i = sum; i >= num; i--) {
+            arr[i] = arr[i] || arr[i - num];
+          }
+        }
+        return arr[sum];
+      };
+
+      // 使用动态规划
+      var canPartition = function (nums) {
+        let sum = 0;
+        nums.forEach((item) => (sum += item));
+        if ((sum & 1) == 1) {
+          return false;
+        }
+        sum /= 2;
+        let arr = Array(sum + 1);
+        arr[0] = true;
+        for (let num of nums) {
+          // 判断已经能够组成的数字加上当前数字能够组成的数字
+          for (let i = sum; i >= num; i--) {
+            arr[i] = arr[i - num] || arr[i];
+          }
+        }
+        return arr[sum];
+      };
+    </script>
+
+    <script>
+      /*
+      419. Battleships in a Board
+      Example:
+
+        X..X
+        ...X
+        ...X
+        In the above board there are 2 battleships.
+      */
+      var countBattleships = function (board) {
+        function Battle() {
+          this.arr = [];
+          this.row = false;
+          this.col = false;
+        }
+        Battle.prototype.push = function (value) {
+          this.arr.push(Array.from(value));
+          if (this.arr.length == 2) {
+            if (this.arr[0][0] == this.arr[1][0]) {
+              this.row = true;
+            } else if (this.arr[0][1] == this.arr[1][1]) {
+              this.col = true;
+            }
+          }
+        };
+        Battle.prototype.judge = function () {
+          if (this.arr.length == 1) {
+            return true;
+          } else {
+            if (this.row) {
+              return (
+                this.arr[this.arr.length - 1][0] ==
+                this.arr[this.arr.length - 2][0]
+              );
+            } else if (this.col) {
+              return (
+                this.arr[this.arr.length - 1][1] ==
+                this.arr[this.arr.length - 2][1]
+              );
+            } else {
+              return false;
+            }
+          }
+        };
+
+        let max = 0;
+
+        let getRe = function (i, j, battle, arr) {
+          arr[i][j] = 1;
+          if (board[i][j] == "X") {
+            battle.push(Array.of(i, j));
+            if (i - 1 >= 0 && !arr[i - 1][j]) {
+              getRe(i - 1, j, battle, arr);
+            }
+            if (i + 1 < board.length && !arr[i + 1][j]) {
+              getRe(i + 1, j, battle, arr);
+            }
+            if (j - 1 >= 0 && !arr[i][j - 1]) {
+              getRe(i, j - 1, battle, arr);
+            }
+            if (j + 1 < board[0].length && !arr[i][j + 1]) {
+              getRe(i, j + 1, battle, arr);
+            }
+          }
+        };
+
+        if (board && board[0]) {
+          let arr = Array(board.length)
+            .fill(0)
+            .map((it) => Array(board[0].length));
+          for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[0].length; j++) {
+              if (!arr[i][j] && board[i][j] == "X") {
+                let temp = new Battle();
+                getRe(i, j, temp, arr);
+                if (temp.judge()) {
+                  max++;
+                }
+              }
+            }
+          }
+        }
+        return max;
+      };
+    </script>
+
+    <script>
+      /*
+      421. Maximum XOR of Two Numbers in an Array
+      Example:
+
+        Input: [3, 10, 5, 25, 2, 8]
+
+        Output: 28
+
+        Explanation: The maximum result is 5 ^ 25 = 28.
+      */
+      var findMaximumXOR = function (nums) {
+        let arr = Array(nums.length);
+        arr[1] = nums[0] ^ nums[1];
+        for (let i = 2; i < arr.length; i++) {
+          arr[i] = arr[i - 1];
+          for (let j = i - 1; j >= 0; j--) {
+            arr[i] = Math.max(arr[i], nums[j] ^ nums[i]);
+          }
+        }
+        return arr[arr.length - 1];
+      };
+    </script>
+
+    <script>
+      /*
+      424. Longest Repeating Character Replacement
+      Example:
+
+        Input:
+        s = "AABABBA", k = 1
+
+        Output:
+        4
+
+        Explanation:
+        Replace the one 'A' in the middle with 'B' and form "AABBBBA".
+        The substring "BBBB" has the longest repeating letters, which is 4.
+      */
+
+      // 使用滑动窗口
+      var characterReplacement = function (s, k) {
+        let left = 0;
+        let right = 1;
+        let max = 0;
+        let obj = {};
+        obj[s[0]] = 1;
+        let maxLen = 1;
+        let char = s[0];
+        while (right < s.length) {
+          if (!(s[right] in obj)) {
+            obj[s[right]] = 1;
+          } else {
+            obj[s[right]]++;
+            if (obj[s[right]] > maxLen) {
+              maxLen = obj[s[right]];
+              char = s[right];
+            }
+          }
+          if (right + 1 - left - maxLen > k) {
+            if (s[left] == char) {
+              maxLen--;
+            }
+            obj[s[left]]--;
+            left++;
+          }
+          max = Math.max(max, right + 1 - left);
+          right++;
+        }
+        return max;
+      };
+    </script>
+
+    <script>
+      /*
+    429.N-ary Tree Level Order Traversal
+    Given an n-ary tree, return the level order traversal of its nodes' values.
+
+    Nary-Tree input serialization is represented in their level order traversal, each group of children is separated by the null value (See examples).
+    */
+      var levelOrder = function (root) {
+        let getRe = function (re, ...node) {
+          let next = [];
+          let arr = [];
+          node.forEach((item) => {
+            arr.push(item.val);
+            if (item.children) {
+              next = next.concat(item.children);
+            }
+          });
+          re.push(arr);
+          if (next.length > 0) {
+            getRe(re, ...next);
+          }
+        };
+        let re = [];
+        if (!root) {
+          return re;
+        }
+        getRe(re, root);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+    430. Flatten a Multilevel Doubly Linked List
+    Example
+
+      Input: head = [1,2,null,3]
+      Output: [1,3,2]
+      Explanation:
+
+      The input multilevel linked list is as follows:
+
+        1---2---NULL
+        |
+        3---NULL
+    */
+      var flatten = function (head) {
+        let getRe = function (node) {
+          if (node) {
+            let t1 = node.child;
+            let t2 = node.next;
+            let re = node;
+            if (t1) {
+              let t = getRe(t1);
+              node.next = t;
+              t.prev = node;
+              while (t.next) {
+                t = t.next;
+              }
+              node = t;
+              re.child = null;
+            }
+            if (t2) {
+              let t = getRe(t2);
+              node.next = t;
+              t.prev = node;
+            }
+            return re;
+          } else {
+            return null;
+          }
+        };
+        return getRe(head);
+      };
+    </script>
+
+    <script>
+      /*
+    433. Minimum Genetic Mutation
+    Example:
+
+      start: "AACCGGTT"
+      end:   "AAACGGTA"
+      bank: ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
+
+      return: 2
+    */
+      var minMutation = function (start, end, bank) {
+        let arr = Array(bank.length);
+        let judeg = function (str1, str2) {
+          let flag = 0;
+          for (let i = 0; i < str1.length; i++) {
+            if (str1[i] != str2[i]) {
+              flag++;
+            }
+          }
+          return flag == 1;
+        };
+        let flag = false;
+        for (let i = 0; i < bank.length; i++) {
+          if (start == bank[i]) {
+            arr[i] = 1;
+          }
+          if (bank[i] == end) {
+            flag = true;
+          }
+        }
+        if (flag) {
+          let src = Array.of(start);
+          let re = 0;
+          while (src.length > 0) {
+            let next = [];
+            re++;
+            for (let i = 0; i < src.length; i++) {
+              for (let j = 0; j < bank.length; j++) {
+                if (!arr[j] && judeg(src[i], bank[j])) {
+                  arr[j] = 1;
+                  if (bank[j] == end) {
+                    return re;
+                  }
+                  next.push(bank[j]);
+                }
+              }
+            }
+            src = next;
+          }
+        }
+        return -1;
+      };
+    </script>
+
+    <script>
+      /*
+      435. Non-overlapping Intervals
+      Example:
+
+        Input: [[1,2],[2,3],[3,4],[1,3]]
+        Output: 1
+        Explanation: [1,3] can be removed and the rest of intervals are non-overlapping.
+      */
+      var eraseOverlapIntervals = function (intervals) {
+        // 対原始数组排序
+        intervals.sort((o1, o2) => {
+          if (o1[0] === o2[0]) {
+            return o1[0] - o2[0];
+          } else {
+            return o1[1] - o2[1];
+          }
+        });
+        let re = 0;
+        let arr = Array(intervals.length);
+        for (let i = 0; i < intervals.length; i++) {
+          let start = intervals[i][1];
+          let j = i + 1;
+          let temp = 1;
+          while (j < intervals.length) {
+            if (!arr[j] && intervals[j][0] >= start) {
+              arr[j] = 1;
+              start = intervals[j][1];
+              temp++;
+            }
+            j++;
+          }
+          re = Math.max(re, temp);
+        }
+        return intervals.length - re;
+      };
+    </script>
+
+    <script>
+      /*
+    437. Path Sum III
+    Example:
+
+      root = [10,5,-3,3,2,null,11,3,-2,null,1], sum = 8
+
+            10
+           /  \
+          5   -3
+         / \    \
+        3   2   11
+       / \   \
+      3  -2   1
+
+      Return 3. The paths that sum to 8 are:
+
+      1.  5 -> 3
+      2.  5 -> 2 -> 1
+      3. -3 -> 11
+    */
+      var pathSum = function (root, sum) {
+        let re = 0;
+        let getRe = function (node, count) {
+          if (node) {
+            count -= node.val;
+            if (count == 0) {
+              re++;
+            }
+            getRe(node.left, count);
+            if (node.left && !node.left.sum) {
+              getRe(node.left, sum);
+              node.left.sum = 1;
+            }
+            getRe(node.right, count);
+            if (node.right && !node.right.sum) {
+              getRe(node.right, sum);
+              node.right.sum = 1;
+            }
+          }
+        };
+        getRe(root, sum);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      438. Find All Anagrams in a String
+      Example:
+
+        Input:
+        s: "cbaebabacd" p: "abc"
+
+        Output:
+        [0, 6]
+
+        Explanation:
+        The substring with start index = 0 is "cba", which is an anagram of "abc".
+        The substring with start index = 6 is "bac", which is an anagram of "abc".
+      */
+      var findAnagrams = function (s, p) {
+        let obj = {};
+        Array.from(p).forEach((it) => {
+          obj[it] = 1;
+        });
+        let pSort = p.split("").sort().join("");
+        function judge(str) {
+          return str.split("").sort().join("") === pSort;
+        }
+        let pass = {};
+        let dPass = {};
+        let re = [];
+        for (let i = 0; i < s.length - p.length + 1; i++) {
+          if (s[i] in obj) {
+            let temp = s.substr(i, p.length);
+            if (!(temp in dPass)) {
+              if (temp in pass) {
+                re.push(i);
+              } else {
+                if (judge(temp)) {
+                  pass[temp] = 1;
+                  re.push(i);
+                } else {
+                  dPass[temp] = 1;
+                }
+              }
+            }
+          }
+        }
+        return re;
+      };
+
+      // 使用sliding window双指针算法
+      var findAnagrams = function (s, p) {
+        let left = 0,
+          right = 0;
+        let obj = {};
+        Array.from(p).forEach((it) => {
+          if (!obj[it]) {
+            obj[it] = 1;
+          } else {
+            obj[it]++;
+          }
+        });
+        let temp = {};
+        let re = [];
+        function judge() {
+          for (let key in obj) {
+            if (!(key in temp) || obj[key] > temp[key]) {
+              return false;
+            }
+          }
+          return true;
+        }
+        while (right < s.length) {
+          if (!temp[s[right]]) {
+            temp[s[right]] = 1;
+          } else {
+            temp[s[right]]++;
+          }
+          right++;
+          while (right - left >= p.length && judge()) {
+            if (right - left == p.length) {
+              re.push(left);
+            }
+            temp[s[left]]--;
+            left++;
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      440. K-th Smallest in Lexicographical Order
+      Example:
+
+        Input:
+        n: 13   k: 2
+
+        Output:
+        10
+
+        Explanation:
+        The lexicographical order is [1, 10, 11, 12, 13, 2, 3, 4, 5, 6, 7, 8, 9], so the second smallest number is 10.
+      */
+      var findKthNumber = function (n, k) {
+        function Node(val) {
+          this.val = val;
+          this.child = [];
+        }
+
+        Node.prototype.add = function (val, temp) {
+          if (val.length > 1) {
+            this.child[val[0]].add(val.slice(1), val[0]);
+          } else {
+            this.child[val[0]] = new Node(temp + val);
+          }
+        };
+
+        Node.prototype.getArr = function () {
+          let re = [this.val];
+          if (this.child.length > 0) {
+            for (let i = 0; i < this.child.length; i++) {
+              if (this.child[i]) {
+                re = re.concat(this.child[i].getArr());
+              }
+            }
+          }
+          return re;
+        };
+        let nodet = new Node(0);
+        for (let i = 1; i <= n; i++) {
+          nodet.add(i + "", "");
+        }
+        return nodet.getArr()[k];
+      };
+    </script>
+
+    <script>
+      /*
+      441. Arranging Coins
+      Example:
+
+        n = 5
+
+        The coins can form the following rows:
+        ¤
+        ¤ ¤
+        ¤ ¤
+
+        Because the 3rd row is incomplete, we return 2.
+      */
+      var arrangeCoins = function (n) {
+        let start = 1,
+          count = 0;
+        while (n >= start) {
+          n -= start;
+          start++;
+          count++;
+        }
+        return co;
+      };
+    </script>
+
+    <script>
+      /*
+      442. Find All Duplicates in an Array
+      Example:
+
+        Input:
+        [4,3,2,7,8,2,3,1]
+
+        Output:
+        [2,3]
+      */
+      var findDuplicates = function (nums) {
+        let re = [];
+        for (let i = 0; i < nums.length; i++) {
+          let target = Math.abs(nums[i]) - 1;
+          if (nums[target] > 0) {
+            nums[target] *= -1;
+          } else {
+            re.push(target + 1);
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      443. String Compression
+      Example:
+
+        Input:
+        ["a","a","b","b","c","c","c"]
+
+        Output:
+        Return 6, and the first 6 characters of the input array should be: ["a","2","b","2","c","3"]
+
+        Explanation:
+        "aa" is replaced by "a2". "bb" is replaced by "b2". "ccc" is replaced by "c3".
+      */
+      var compress = function (chars) {
+        let pre = 0;
+        let next = 0;
+        let length = 0;
+        let count = 0;
+        while (next <= chars.length) {
+          if (chars[next] != chars[pre]) {
+            let temp = count;
+            if (temp > 1) {
+              temp += "";
+              for (let i = 0; i < temp.length; i++) {
+                chars[++pre] = temp[i];
+                length++;
+              }
+            }
+            chars[++pre] = chars[next];
+            length++;
+            count = 1;
+          } else {
+            count++;
+          }
+          next++;
+        }
+        return length;
+      };
+    </script>
+
+    <script>
+      /*
+      445. Add Two Numbers II
+      Example:
+
+        Input: (7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)
+        Output: 7 -> 8 -> 0 -> 7
+      */
+      var addTwoNumbers = function (l1, l2) {
+        let temp = 0;
+        let getRe = function (n1, n2, index) {
+          if (!n1 && !n2) {
+            return null;
+          } else if (n1 && n2) {
+            if (index <= 0) {
+              let last = getRe(n1.next, n2.next, index - 1);
+              if (last && last.val >= 10) {
+                last.val %= 10;
+                temp = 1;
+              } else {
+                temp = 0;
+              }
+              return new ListNode(n1.val + n2.val + temp, last);
+            } else {
+              let last = getRe(n1.next, n2, index - 1);
+              if (last && last.val >= 10) {
+                last.val %= 10;
+                temp = 1;
+              } else {
+                temp = 0;
+              }
+              return new ListNode(n1.val + temp, last);
+            }
+          }
+        };
+        let getLen = function (node) {
+          if (!node) {
+            return 0;
+          } else {
+            return 1 + getLen(node.next);
+          }
+        };
+        let len1 = getLen(l1);
+        let len2 = getLen(l2);
+        if (len1 > len2) {
+          let re = getRe(l1, l2, len1 - len2);
+          if (re.val > 9) {
+            re.val %= 10;
+            let tempL = new ListNode(1, re);
+            return tempL;
+          } else {
+            return re;
+          }
+        } else {
+          let re = getRe(l2, l1, len2 - len1);
+          if (re.val > 9) {
+            re.val %= 10;
+            let tempL = new ListNode(1, re);
+            return tempL;
+          } else {
+            return re;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      448. Find All Numbers Disappeared in an Array
+      Example:
+
+        Input:
+        [4,3,2,7,8,2,3,1]
+
+        Output:
+        [5,6]
+      */
+      var findDisappearedNumbers = function (nums) {
+        let re = [];
+        let getRe = function (index) {
+          if (index !== true && nums[index - 1] !== true) {
+            let temp = nums[index - 1];
+            nums[index - 1] = true;
+            getRe(temp);
+          }
+        };
+        for (let i = 0; i < nums.length; i++) {
+          getRe(nums[i]);
+        }
+        for (let i = 0; i < nums.length; i++) {
+          if (nums[i] !== true) {
+            re.push(i + 1);
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      449. Serialize and Deserialize BST
+      Design an algorithm to serialize and deserialize a binary search tree. 
+      There is no restriction on how your serialization/deserialization algorithm should work. 
+      You just need to ensure that a binary search tree can be serialized to a string and this string can be deserialized to the original tree structure.
+
+      The encoded string should be as compact as possible.
+      */
+
+      // 将BTS序列化位字符串
+      var serialize = function (root) {
+        let getRe = function (node) {
+          if (node) {
+            let re = node.val + ",";
+            re += getRe(node.left);
+            re += getRe(node.right);
+            return re;
+          } else {
+            return "";
+          }
+        };
+        let re = getRe(root);
+        return re.slice(0, re.length - 1);
+      };
+
+      // 从字符串中读取BTS
+      var deserialize = function (data) {
+        if (data.length > 0) {
+          let arr = data.split(",").map((it) => Number(it));
+          let getRe = function (arr, min, max) {
+            if (arr.length == 0 || arr[0] < min || arr[0] > max) {
+              return null;
+            } else {
+              let re = arr.shift();
+              let temp = new TreeNode(re);
+              temp.left = getRe(arr, min, re);
+              temp.right = getRe(arr, re, max);
+              return temp;
+            }
+          };
+          return getRe(arr, -Infinity, Infinity);
+        } else {
+          return null;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      450. Delete Node in a BST
+      Example:
+
+        root = [5,3,6,2,4,null,7]
+        key = 3
+
+            5
+           / \
+          3   6
+         / \   \
+        2   4   7
+
+        Given key to delete is 3. So we find the node with value 3 and delete it.
+
+        One valid answer is [5,4,6,2,null,null,7], shown in the following BST.
+
+            5
+           / \
+          4   6
+         /     \
+        2       7
+
+        Another valid answer is [5,2,6,null,4,null,7].
+
+            5
+           / \
+          2   6
+           \   \
+            4   7
+      */
+      var deleteNode = function (root, key) {
+        let getRe = function (node) {
+          if (node) {
+            if (node.val == key) {
+              let left = node.left;
+              let right = node.right;
+              if (!left && !right) {
+                return null;
+              } else if (!left) {
+                return right;
+              } else if (!right) {
+                return left;
+              } else {
+                let t = left;
+                if (t.right) {
+                  while (t.right) {
+                    if (!t.right.right) {
+                      let temp = t.right;
+                      t.right = temp.left;
+                      t = temp;
+                    } else {
+                      t = t.right;
+                    }
+                  }
+                  t.left = left;
+                  t.right = right;
+                  return t;
+                } else {
+                  t.right = right;
+                  return t;
+                }
+              }
+            } else {
+              if (node.left && key < node.val) {
+                node.left = getRe(node.left);
+              } else if (node.right && key > node.val) {
+                node.right = getRe(node.right);
+              }
+              return node;
+            }
+          } else {
+            return null;
+          }
+        };
+        return getRe(root);
+      };
+    </script>
+
+    <script>
+      /*
+      451. Sort Characters By Frequency
+      Example:
+
+        Input:
+        "Aabb"
+
+        Output:
+        "bbAa"
+
+        Explanation:
+        "bbaA" is also a valid answer, but "Aabb" is incorrect.
+        Note that 'A' and 'a' are treated as two different characters.
+      */
+      var frequencySort = function (s) {
+        let obj = {};
+        for (let i = 0; i < s.length; i++) {
+          if (!(s[i] in obj)) {
+            let temp = {};
+            temp["key"] = 1;
+            temp["value"] = s[i];
+            obj[s[i]] = temp;
+          } else {
+            obj[s[i]]["key"]++;
+          }
+        }
+        return Object.values(obj)
+          .sort((o1, o2) => o2.key - o1.key)
+          .map((it) => it.value.repeat(it.key))
+          .join("");
+      };
+    </script>
+
+    <script>
+      /*
+      453. Minimum Moves to Equal Array Elements
+      Example:
+
+        Input:
+        [1,2,3]
+
+        Output:
+        3
+
+        Explanation:
+        Only three moves are needed (remember each move increments two elements):
+
+        [1,2,3]  =>  [2,3,3]  =>  [3,4,3]  =>  [4,4,4]
+        将所有需要的元素加一,相当于让最大的减去一
+      */
+      var minMoves = function (nums) {
+        let min = Infinity;
+        nums.forEach((it) => (min = Math.min(min, it)));
+        return nums.reduce((pre, current) => (pre += current - min), 0);
+      };
+    </script>
+
+    <script>
+      /*
+      455. Assign Cookies
+      Example:
+        Input: [1,2], [1,2,3]
+
+        Output: 2
+
+        Explanation: You have 2 children and 3 cookies. The greed factors of 2 children are 1, 2. 
+        You have 3 cookies and their sizes are big enough to gratify all of the children, 
+        You need to output 2.
+      */
+      var findContentChildren = function (g, s) {
+        g.sort((o1, o2) => o1 - o2);
+        s.sort((o1, o2) => o1 - o2);
+        let re = 0;
+        let i = 0;
+        s.forEach((it) => {
+          if (it >= g[i]) {
+            re++;
+            i++;
+          }
+        });
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      456. 132 Pattern
+      Example:
+
+        Input: [-1, 3, 2, 0]
+
+        Output: True
+
+        Explanation: There are three 132 patterns in the sequence: [-1, 3, 2], [-1, 3, 0] and [-1, 2, 0].
+      */
+      var find132pattern = function (nums) {
+        if (nums.length >= 3) {
+          let stack = [];
+          let min = nums[0];
+          let max;
+          for (let i = 1; i < nums.length; i++) {
+            for (let j = 0; j < stack.length; j++) {
+              if (stack[j][0] < nums[i] && stack[j][1] > nums[i]) {
+                return true;
+              }
+            }
+            if (
+              min != undefined &&
+              max != undefined &&
+              nums[i] > min &&
+              nums[i] < max
+            ) {
+              return true;
+            } else {
+              if (max != undefined && nums[i] >= max) {
+                max = nums[i];
+              } else if (nums[i] < min) {
+                if (max != undefined) {
+                  stack.push(Array.of(min, max));
+                }
+                min = nums[i];
+                max = undefined;
+              } else if (nums[i] > min && max == undefined) {
+                max = nums[i];
+              }
+              while (stack.length > 0 && max >= stack[stack.length - 1][1]) {
+                stack.pop();
+              }
+            }
+          }
+        }
+        return false;
+      };
+
+      // 使用 单调递减栈,核心思想从后向前遍历可以找出最大值与第二大值
+      var find132pattern = function (nums) {
+        if (nums && nums.length >= 3) {
+          let stack = [];
+          let stackMin = Number.MIN_SAFE_INTEGER;
+          for (let i = nums.length - 1; i >= 0; i--) {
+            if (nums[i] < stackMin) {
+              return true;
+            }
+            while (stack.length && nums[i] > stack[stack.length - 1]) {
+              stackMin = Math.max(stack.pop(), stackMin);
+            }
+            stack.push(nums[i]);
+          }
+          return false;
+        } else {
+          return false;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      457. Circular Array Loop
+      Example:
+
+        Input: [-2,1,-1,-2,-2]
+        Output: false
+        Explanation: The movement from index 1 -> 2 -> 1 -> ... is not a cycle, 
+        because movement from index 1 -> 2 is a forward movement, 
+        but movement from index 2 -> 1 is a backward movement. 
+        All movements in a cycle must follow a single direction.
+      */
+      var circularArrayLoop = function (nums) {};
+    </script>
+
+    <script>
+      /*
+      460. LFU Cache
+
+      Example:
+
+        LFUCache cache = new LFUCache( 2 capacity);
+
+        cache.put(1, 1);
+        cache.put(2, 2);
+        cache.get(1);       // returns 1
+        cache.put(3, 3);    // evicts key 2
+        cache.get(2);       // returns -1 (not found)
+        cache.get(3);       // returns 3.
+        cache.put(4, 4);    // evicts key 1.
+        cache.get(1);       // returns -1 (not found)
+        cache.get(3);       // returns 3
+        cache.get(4);       // returns 4
+      */
+    </script>
+
+    <script>
+      /*
+      461. Hamming Distance
+      Example:
+
+        Input: x = 1, y = 4
+
+        Output: 2
+
+        Explanation:
+        1   (0 0 0 1)
+        4   (0 1 0 0)
+               ↑   ↑
+
+        The above arrows point to positions where the corresponding bits are different.
+      */
+      var hammingDistance = function (x, y) {
+        let temp = x ^ y;
+        let re = 0;
+        while (temp > 0) {
+          temp = temp & (temp - 1);
+          re++;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      462. Minimum Moves to Equal Array Elements II
+      Example:
+
+        Input:
+        [1,2,3]
+
+        Output:
+        2
+
+        Explanation:
+        Only two moves are needed (remember each move increments or decrements one element):
+
+        [1,2,3]  =>  [2,2,3]  =>  [2,2,2]
+        // 数学问题,求中位数
+      */
+      // 使用快排,快速确定元素位置
+      var minMoves2 = function (nums) {
+        function swap(i, j) {
+          let temp = nums[i];
+          nums[i] = nums[j];
+          nums[j] = temp;
+        }
+        let re = 0;
+        function quickSort(start, end, i1, i2) {
+          if (end - start >= 1) {
+            let current = (Math.random() * (end - start) + start) | 0;
+            swap(current, end - 1);
+            let t = start;
+            for (let i = start; i < end; i++) {
+              if (nums[i] < nums[end - 1]) {
+                swap(t++, i);
+              }
+            }
+            swap(t, end - 1);
+            if (t == i1) {
+              re += nums[t];
+            }
+            if (t == i2) {
+              re += nums[t];
+            }
+            if (t < i1) {
+              quickSort(t + 1, end, i1, i2);
+            } else if (t > i2) {
+              quickSort(start, t, i1, i2);
+            } else if (t > i1 || t < i2) {
+              quickSort(start, t, i1, i2);
+              quickSort(t + 1, end, i1, i2);
+            }
+          }
+        }
+        if ((nums.length & 1) == 1) {
+          let i = (nums.length / 2) | 0;
+          quickSort(0, nums.length, i, i);
+        } else {
+          let i = nums.length / 2 - 1;
+          quickSort(0, nums.length, i, i + 1);
+        }
+        re = re / 2;
+        let temp = 0;
+        nums.forEach((it) => {
+          temp += Math.abs(it - re);
+        });
+        return temp;
+      };
+    </script>
+
+    <script>
+      /*
+      463. Island Perimeter
+      Example:
+
+        Input:
+        [
+        [0,1,0,0],
+        [1,1,1,0],
+        [0,1,0,0],
+        [1,1,0,0]
+        ]
+            
+        Output: 16
+            
+        Explanation: The perimeter is the 16 yellow stripes in the image below:
+      */
+      var islandPerimeter = function (grid) {
+        let obj = {};
+        let getRe = function (i, j) {
+          if (
+            i >= 0 &&
+            i < grid.length &&
+            j >= 0 &&
+            j < grid[0].length &&
+            grid[i][j] == 1
+          ) {
+            let re = 0;
+            obj[i + ":" + j] = 1;
+            if (!(i + ":" + (j + 1) in obj)) {
+              re += getRe(i, j + 1);
+            }
+            if (!(i + ":" + (j - 1) in obj)) {
+              re += getRe(i, j - 1);
+            }
+            if (!(i + 1 + ":" + j in obj)) {
+              re += getRe(i + 1, j);
+            }
+            if (!(i - 1 + ":" + j in obj)) {
+              re += getRe(i - 1, j);
+            }
+            return re;
+          } else {
+            return 1;
+          }
+        };
+        for (let i = 0; i < grid.length; i++) {
+          for (let j = 0; j < grid[0].length; j++) {
+            if (grid[i][j] == 1) {
+              return getRe(i, j);
+            }
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      464. Can I Win
+      Example
+
+        Input:
+        maxChoosableInteger = 10
+        desiredTotal = 11
+
+        Output:
+        false
+
+        Explanation:
+        No matter which integer the first player choose, the first player will lose.
+        The first player can choose an integer from 1 up to 10.
+        If the first player choose 1, the second player can only choose integers from 2 up to 10.
+        The second player will win by choosing 10 and get a total = 11, which is >= desiredTotal.
+        Same with other integers chosen by the first player, the second player will always win.
+      */
+
+      var canIWin = function (maxChoosableInteger, desiredTotal) {};
+    </script>
+
+    <script>
+      /*
+      466. Count The Repetitions
+      Example:
+
+        Input:
+        s1="acb", n1=4
+        s2="ab", n2=2
+
+        Return:
+        2
+      */
+      var getMaxRepetitions = function (s1, n1, s2, n2) {};
+    </script>
+
+    <script>
+      /*
+      467. Unique Substrings in Wraparound String
+      Example:
+
+        Input: "zab"
+        Output: 6
+        Explanation: There are six substrings "z", "a", "b", "za", "ab", "zab" of string "zab" in the string s.
+      */
+
+      // 超时
+      var findSubstringInWraproundString = function (p) {
+        let re = 0;
+        let arr = Array(p.length)
+          .fill(0)
+          .map((it) => []);
+        let obj = {};
+        for (let i = 0; i < p.length; i++) {
+          arr[i].push(p[i]);
+          if (!(p[i] in obj)) {
+            re++;
+            obj[p[i]] = 1;
+          }
+          if (i - 1 >= 0) {
+            if (
+              p[i].charCodeAt() - p[i - 1].charCodeAt() == 1 ||
+              (p[i] == "a" && p[i - 1] == "z")
+            ) {
+              for (let j = 0; j < arr[i - 1].length; j++) {
+                let temp = arr[i - 1][j] + p[i];
+                arr[i].push(temp);
+                if (!(temp in obj)) {
+                  re++;
+                  obj[temp] = 1;
+                }
+              }
+            }
+          }
+        }
+        return re;
+      };
+
+      // 使用动态规划
+      var findSubstringInWraproundString = function (p) {
+        let arr = Array(p.length).fill(0);
+        let obj = {};
+        let re = 0;
+        for (let i = 0; i < arr.length; i++) {
+          let c = p[i];
+          if (!(c in obj)) {
+            re++;
+            obj[c] = 0;
+          }
+          if (
+            i > 0 &&
+            (p[i].charCodeAt() - p[i - 1].charCodeAt() == 1 ||
+              (p[i] == "a" && p[i - 1] == "z"))
+          ) {
+            arr[i] = arr[i - 1] + 1;
+            if (arr[i] > obj[p[i]]) {
+              re += arr[i] - obj[p[i]];
+              obj[p[i]] = arr[i];
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      468. Validate IP Address
+      Example:
+
+        Input: IP = "2001:0db8:85a3:0:0:8A2E:0370:7334"
+        Output: "IPv6"
+        Explanation: This is a valid IPv6 address, return "IPv6".
+      Example:
+
+        Input: IP = "256.256.256.256"
+        Output: "Neither"
+        Explanation: This is neither a IPv4 address nor a IPv6 address.
+      */
+      var validIPAddress = function (IP) {
+        function judgeV4(arr) {
+          if (arr.length != 4) {
+            return "Neither";
+          }
+          return arr.every((it) => {
+            if ((it.length > 1 && it[0] == 0) || it == "") {
+              return false;
+            }
+            return Array.from(it).every((item) => "1234567890".includes(item));
+          })
+            ? "IPv4"
+            : "Neither";
+        }
+
+        function judgeV6(arr) {
+          if (arr.length != 8) {
+            return "Neither";
+          }
+          return arr.every((it) => {
+            if (it.length > 4 || it == "") {
+              return false;
+            }
+            return Array.from(it).every((item) =>
+              "1234567890abcdefABCDEF".includes(item)
+            );
+          })
+            ? "IPv6"
+            : "Neither";
+        }
+        if (IP.includes(".")) {
+          return judgeV4(IP.split("."));
+        } else {
+          if (IP.includes("::")) {
+            return "Neither";
+          }
+          return judgeV6(IP.split(":"));
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      470. Implement Rand10() Using Rand7()
+      Example:
+
+        Input: 3
+        Output: [8,1,10]
+
+      解法:
+      https://www.cnblogs.com/grandyang/p/9727206.html
+      */
+      var rand10 = function () {};
+    </script>
+
+    <script>
+      /*
+      473. Matchsticks to Square
+      Example:
+        
+        Input: [1,1,2,2,2]
+        Output: true
+          
+        Explanation: You can form a square with length 2, one side of the square came two sticks with length 1.
+      */
+      var makesquare = function (nums) {
+        if (nums) {
+          let all = 0;
+          nums.forEach((it) => (all += it));
+          if (all % 4 != 0) {
+            return false;
+          }
+          let target = all / 4;
+
+          nums.sort((o1, o2) => o1 - o2);
+
+          let max = Math.max(...nums);
+          let min = Math.min(...nums);
+          if (max < target && max + min > target) {
+            return false;
+          }
+          let getRe = function (arr, index) {
+            if (index == nums.length) {
+              return true;
+            } else {
+              let re = false;
+              for (let i = 0; i < 4; i++) {
+                if (arr[i] + nums[index] <= target) {
+                  arr[i] += nums[index];
+                  re = re || getRe(arr, index + 1);
+                  arr[i] -= nums[index];
+                }
+              }
+              return re;
+            }
+          };
+          return getRe(Array(4).fill(0), 0);
+        } else {
+          return false;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      474. Ones and Zeroes
+      Example:
+
+        Input: strs = ["10","0001","111001","1","0"], m = 5, n = 3
+        Output: 4
+        Explanation: This are totally 4 strings can be formed by the using of 5 0s and 3 1s, which are "10","0001","1","0".
+      Example:
+
+        Input: strs = ["10","0","1"], m = 1, n = 1
+        Output: 2
+        Explanation: You could form "10", but then you'd have nothing left. Better form "0" and "1".
+      */
+
+      // 使用动态规划
+      var findMaxForm = function (strs, m, n) {};
+      // console.log(findMaxForm(["10", "0001", "111001", "1", "0"], 1, 1));
+    </script>
+
+    <script>
+      /*
+      475. Heaters
+
+      Example:
+
+        Input: [1,2,3,4],[1,4]
+        Output: 1
+        Explanation: The two heater was placed in the position 1 and 4. We need to use radius 1 standard, then all the houses can be warmed.
+
+      这道题是一道蛮有意思的题目，
+      首先我们看题目中的例子，
+      不管是houses还是heaters数组都是有序的，
+      所以我们也需要给输入的这两个数组先排序，
+      以免其为乱序。
+      我们就拿第二个例子来分析，我们的目标是houses中的每一个数字都要被cover到，那么我们就遍历houses数组，
+      对每一个数组的数字，我们在heaters中找能包含这个数字的左右范围，然后看离左右两边谁近取谁的值，
+      如果某个house位置比heaters中最小的数字还小，那么肯定要用最小的heater去cover，反之如果比最大的数字还大，
+      就用最大的数字去cover。对于每个数字算出的半径，我们要取其中最大的值。通过上面的分析，我们就不难写出代码了。
+      */
+
+      // 常规思路
+      var findRadius = function (houses, heaters) {
+        houses.sort((o1, o2) => o1 - o2);
+        heaters.sort((o1, o2) => o1 - o2);
+        let re = 0;
+        for (let i = 0; i < houses.length; i++) {
+          if (houses[i] < heaters[0]) {
+            re = Math.max(re, heaters[0] - houses[i]);
+          } else if (houses[i] > heaters[heaters.length - 1]) {
+            re = Math.max(re, houses[i] - heaters[heaters.length - 1]);
+          } else {
+            for (let j = 0; j < heaters.length; j++) {
+              if (heaters[j] == houses[i]) {
+                break;
+              }
+              if (heaters[j] < houses[i] && heaters[j + 1] >= houses[i]) {
+                re = Math.max(
+                  re,
+                  Math.min(houses[i] - heaters[j], heaters[j + 1] - houses[i])
+                );
+              }
+            }
+          }
+        }
+        return re;
+      };
+
+      // 使用二分优化
+      var findRadius = function (houses, heaters) {
+        houses.sort((o1, o2) => o1 - o2);
+        heaters.sort((o1, o2) => o1 - o2);
+        let re = 0;
+        function getRe(start, end, target) {
+          while (end >= start) {
+            let mid = ((start + end) / 2) | 0;
+            if (heaters[mid] == target) {
+              return true;
+            } else if (heaters[mid] < target) {
+              if (heaters[mid + 1] < target) {
+                start = mid + 1;
+              } else {
+                return mid;
+              }
+            } else {
+              end = mid - 1;
+            }
+          }
+        }
+
+        for (let i = 0; i < houses.length; i++) {
+          if (houses[i] < heaters[0]) {
+            re = Math.max(re, heaters[0] - houses[i]);
+          } else if (houses[i] > heaters[heaters.length - 1]) {
+            re = Math.max(re, houses[i] - heaters[heaters.length - 1]);
+          } else {
+            let index = getRe(0, heaters.length - 1, houses[i]);
+            if (index !== true) {
+              re = Math.max(
+                re,
+                Math.min(
+                  houses[i] - heaters[index],
+                  heaters[index + 1] - houses[i]
+                )
+              );
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      477. Total Hamming Distance
+      Example:
+        Input: 4, 14, 2
+
+        Output: 6
+
+        Explanation: In binary representation, the 4 is 0100, 14 is 1110, and 2 is 0010 (just
+        showing the four bits relevant in this case). So the answer will be:
+        HammingDistance(4, 14) + HammingDistance(4, 2) + HammingDistance(14, 2) = 2 + 2 + 2 = 6.
+      */
+      var totalHammingDistance = function (nums) {
+        // 获取任意两个数的汉明距离
+        function getRe(num1, num2) {
+          let target = num1 ^ num2;
+          let re = 0;
+          while (target > 0) {
+            target = target & (target - 1);
+            re++;
+          }
+          return re;
+        }
+        let re = 0;
+        for (let i = 0; i < nums.length - 1; i++) {
+          for (let j = i + 1; j < nums.length; j++) {
+            re += getRe(Number(nums[i]), Number(nums[j]));
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      486. Predict the Winner
+      Example:
+
+        Input: [1, 5, 2]
+        Output: False
+        Explanation: Initially, player 1 can choose between 1 and 2. 
+        If he chooses 2 (or 1), then player 2 can choose from 1 (or 2) and 5. If player 2 chooses 5, then player 1 will be left with 1 (or 2). 
+        So, final score of player 1 is 1 + 2 = 3, and player 2 is 5. 
+        Hence, player 1 will never be the winner and you need to return False.
+      */
+      var PredictTheWinner = function (nums) {};
+    </script>
+
+    <script>
+      /*
+      491. Increasing Subsequences
+      Example:
+
+        Input: [4, 6, 7, 7]
+        Output: [[4, 6], [4, 7], [4, 6, 7], [4, 6, 7, 7], [6, 7], [6, 7, 7], [7,7], [4,7,7]]
+      */
+      var findSubsequences = function (nums) {
+        let re = [];
+        let obj = {};
+        function getRe(temp, index) {
+          if (temp.length > 1) {
+            let key = temp.join(":");
+            if (!(key in obj)) {
+              obj[key] = 1;
+              re.push(Array.from(temp));
+            }
+          }
+          for (let i = index; i < nums.length; i++) {
+            if (!temp.length) {
+              temp.push(nums[i]);
+              getRe(temp, i + 1);
+              temp.pop();
+            } else {
+              if (nums[i] >= temp[temp.length - 1]) {
+                temp.push(nums[i]);
+                getRe(temp, i + 1);
+                temp.pop();
+              }
+            }
+          }
+        }
+        getRe([], 0);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      492. Construct the Rectangle
+      Example:
+
+        Input: 4
+        Output: [2, 2]
+        Explanation: The target area is 4, and all the possible ways to construct it are [1,4], [2,2], [4,1]. 
+        But according to requirement 2, [1,4] is illegal; according to requirement 3,  [4,1] is not optimal compared to [2,2]. So the length L is 2, and the width W is 2.
+      */
+      var constructRectangle = function (area) {
+        let w = Math.trunc(Math.sqrt(area));
+        while (area % w !== 0) {
+          w--;
+        }
+        return [area / w, w];
+      };
+    </script>
+
+    <script>
+      /*
+      493. Reverse Pairs
+      Example:
+
+        Input: [2,4,3,5,1]
+        Output: 3
+      */
+      var reversePairs = function (nums) {};
+    </script>
+
+    <script>
+      /*
+      494. Target Sum
+
+      Example:
+
+        Input: nums is [1, 1, 1, 1, 1], S is 3. 
+        Output: 5
+        Explanation: 
+
+        -1+1+1+1+1 = 3
+        +1-1+1+1+1 = 3
+        +1+1-1+1+1 = 3
+        +1+1+1-1+1 = 3
+        +1+1+1+1-1 = 3
+
+        There are 5 ways to assign symbols to make the sum of nums be target 3.
+      */
+
+      var findTargetSumWays = function (nums, S) {
+        let obj = {};
+        function func(index, count) {
+          if (index === nums.length) {
+            if (count === S) {
+              return 1;
+            } else {
+              return 0;
+            }
+          } else if (index < nums.length) {
+            let re = 0;
+            let key = index + ":" + count;
+            if (!(key in obj)) {
+              obj[key] = 0;
+              obj[key] += func(index + 1, count + nums[index]);
+              obj[key] += func(index + 1, count - nums[index]);
+            }
+            re += obj[key];
+            return re;
+          }
+        }
+        return func(0, 0);
+      };
+    </script>
+
+    <script>
+      /*
+      498. Diagonal Traverse
+      Example:
+
+        Input:
+        [
+          [ 1, 2, 3 ],
+          [ 4, 5, 6 ],
+          [ 7, 8, 9 ]
+        ]
+
+        Output:  [1,2,4,7,5,3,6,8,9]
+      */
+
+      var findDiagonalOrder = function (matrix) {
+        let x = matrix.length;
+        if (x) {
+          let y = matrix[0].length;
+          if (x == 1) {
+            return matrix[0];
+          }
+          if (y == 1) {
+            let re = [];
+            for (let i = 0; i < x; i++) {
+              re.push(matrix[i][0]);
+            }
+            return re;
+          }
+          let re = [];
+          function next(i, j, flag, isDing, dingX) {
+            if (i < x && j < y) {
+              re.push(matrix[i][j]);
+              // 如果是顶点
+              if (isDing) {
+                // 顶点在当前x轴上
+                if (dingX) {
+                  // 当前x轴还有右移空间
+                  if (j + 1 < y) {
+                    next(i, j + 1, true, false, dingX);
+                  } else {
+                    // 没有右移空间,向下移,当前x轴也需要向下移
+                    next(i + 1, j, true, false, dingX);
+                  }
+                } else {
+                  // 顶点在y轴上
+                  if (i + 1 < x) {
+                    next(i + 1, j, false, false, dingX);
+                  } else {
+                    next(i, j + 1, false, false, dingX);
+                  }
+                }
+              } else {
+                // 如果不是顶点
+                if (flag) {
+                  next(i + 1, j - 1, flag, i + 1 == x - 1 || j - 1 == 0, false);
+                } else {
+                  next(i - 1, j + 1, flag, j + 1 == y - 1 || i - 1 == 0, true);
+                }
+              }
+            }
+          }
+          next(0, 0, true, true, true);
+          return re;
+        } else {
+          return [];
+        }
+      };
+      findDiagonalOrder([[1, 2, 3, 4]]);
+      findDiagonalOrder([
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+      ]);
+      // findDiagonalOrder([
+      //   [1, 2, 3, 4],
+      //   [5, 6, 7, 8],
+      //   [9, 10, 11, 12],
+      //   [13, 14, 15, 16],
+      // ]);
+    </script>
+  </head>
+
+  <body></body>
+</html>

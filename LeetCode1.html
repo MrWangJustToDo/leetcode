@@ -1,0 +1,4660 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>LeetCode题解</title>
+    <script src="./List.js"></script>
+    <script>
+      /*
+      1. Two Sum
+
+      Example:
+        Given nums = [2, 7, 11, 15], target = 9,
+        Because nums[0] + nums[1] = 2 + 7 = 9,
+        return [0, 1].
+      */
+
+      var twoSum = function (nums, target) {
+        let obj = {};
+        for (let i = 0; i < nums.length; i++) {
+          if (target - nums[i] in obj) {
+            return [obj[target - nums[i]], i];
+          } else {
+            obj[nums[i]] = i;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      2. Add Two Number
+
+      Example:
+        Input: (2 -> 4 -> 3) + (5 -> 6 -> 4)
+        [2,4,3] [6,4] -> 342 + 46 -> 388
+        Output: 7 -> 0 -> 8
+        Explanation: 342 + 465 = 807.
+      */
+      var addTwoNumbers = function (l1, l2) {
+        let listToArr = function (li) {
+          let arr = [];
+          while (li) {
+            arr.push(li.val);
+            li = li.next;
+          }
+          return arr;
+        };
+        let arrToList = function (arr) {
+          let head = new ListNode(arr ? arr[0] : "");
+          let temp = head;
+          let len = 1;
+          while (len < arr.length) {
+            let next = new ListNode(arr[len++]);
+            temp.next = next;
+            temp = next;
+          }
+          return head;
+        };
+        let arr1 = listToArr(l1);
+        let arr2 = listToArr(l2);
+        let re = [];
+        let temp = 0;
+        let len1 = 0;
+        let len2 = 0;
+        while (len1 < arr1.length || len2 < arr2.length) {
+          let count =
+            (len1 < arr1.length ? arr1[len1++] : 0) +
+            (len2 < arr2.length ? arr2[len2++] : 0) +
+            temp;
+          if (count > 9) {
+            temp = 1;
+            count %= 10;
+          } else {
+            temp = 0;
+          }
+          re.push(count);
+        }
+        if (temp == 1) {
+          re.push(1);
+        }
+        return arrToList(re);
+      };
+
+      // 使用原生的链表
+      var addTwoNumbers = function (l1, l2) {
+        let add = 0;
+        let currentNode = null;
+        let firstNode = null;
+        while (l1 || l2 || add) {
+          let value = (l1 ? l1.val : 0) + (l2 ? l2.val : 0) + add;
+          if (value > 9) {
+            value %= 10;
+            add = 1;
+          } else {
+            add = 0;
+          }
+          let temp = new ListNode(value);
+          if (!firstNode) {
+            firstNode = temp;
+            currentNode = temp;
+          } else {
+            currentNode.next = temp;
+            currentNode = currentNode.next;
+          }
+          l1 = l1 && l1.next;
+          l2 = l2 && l2.next;
+        }
+        return firstNode;
+      };
+    </script>
+
+    <script>
+      /*
+      3. Longest Substring Without Repeating Characters
+
+      Example:
+        Input: "pwwkew"
+        Output: 3
+        Explanation: The answer is "wke", with the length of 3. 
+        Note that the answer must be a substring, "pwke" is a subsequence and not a substring.
+      */
+      var lengthOfLongestSubstring = function (s) {
+        if (s.length == 0) {
+          return 0;
+        }
+        var tArr = [],
+          arr = [];
+        for (var i = 0; i < s.length; i++) {
+          var temp = s[i],
+            index = tArr.indexOf(temp);
+          if (index == -1) {
+            tArr.push(temp);
+          } else {
+            arr.push(tArr.length);
+            tArr.splice(0, index + 1);
+            tArr.push(temp);
+          }
+        }
+        arr.push(tArr.length);
+        return Math.max(...arr);
+      };
+
+      // 使用滑动窗口思想
+      var lengthOfLongestSubstring = function (s) {
+        if (s.length == 0) {
+          return 0;
+        } else {
+          let obj = {};
+          let left = 0;
+          let right = 0;
+          let re = 0;
+          while (right < s.length) {
+            if (s[right] in obj && obj[s[right]] >= left) {
+              re = Math.max(re, right - left);
+              while (left < right && s[left] != s[right]) {
+                left++;
+              }
+              left++;
+            }
+            obj[s[right]] = right;
+            right++;
+            if (right == s.length) {
+              re = Math.max(re, right - left);
+            }
+          }
+          return re;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      4. Median of Two Sorted Arrays
+
+      Example 2:
+
+        nums1 = [1, 2]
+        nums2 = [3, 4]
+        The median is (2 + 3)/2 = 2.5
+      */
+
+      // 拼接为一个数组 这个方法不行
+      var findMedianSortedArrays = function (nums1, nums2) {
+        var getArr = function (num1, num2) {
+          var re = [],
+            i = 0,
+            j = 0;
+          while (i < num1.length && j < num2.length) {
+            if (num1[i] < num2[j]) {
+              re.push(num1[i++]);
+            } else {
+              re.push(num2[j++]);
+            }
+          }
+          while (i < num1.length) {
+            re.push(num1[i++]);
+          }
+          while (j < num2.length) {
+            re.push(num2[j++]);
+          }
+          return re;
+        };
+        var arr = getArr(nums1, nums2);
+        if (arr.length % 2 == 0) {
+          return (arr[arr.length / 2] + arr[arr.length / 2 - 1]) / 2;
+        } else {
+          return arr[Math.floor(arr.length / 2)];
+        }
+      };
+
+      // 尝试使用二分  暂时看不懂。。。
+      var findMedianSortedArrays = function (nums1, nums2) {};
+    </script>
+
+    <script>
+      /*
+      5. Longest Palindromic Substring
+
+      Example:
+        Input: "babad"
+        Output: "bab"
+        Note: "aba" is also a valid answer.
+      */
+      // 使用动态规划
+      var longestPalindrome = function (s) {
+        let arr = Array(s.length);
+        let re = "";
+        for (let i = 0; i < s.length; i++) {
+          if (!arr[i]) {
+            arr[i] = Array(s.length);
+          }
+          for (let j = 0; j <= i; j++) {
+            if (s[i] == s[j]) {
+              arr[i][j] = i - j > 2 ? arr[i - 1][j + 1] : 1;
+            }
+            if (arr[i][j]) {
+              re = re.length > i - j + 1 ? re : s.substring(j, i + 1);
+            }
+          }
+        }
+        return re;
+      };
+
+      // 使用常规解法
+      var longestPalindrome = function (s) {
+        let judgeStr = function (start, end) {
+          while (end > start) {
+            if (s[start] != s[end]) {
+              return false;
+            }
+            start++;
+            end--;
+          }
+          return true;
+        };
+        let getArr = function (target) {
+          let re = [];
+          for (let i = 0; i < s.length; i++) {
+            if (s[i] == target) {
+              re.push(i);
+            }
+          }
+          return re;
+        };
+        let obj = {};
+        let re = "";
+        for (let i = s.length - 1; i >= 0; i--) {
+          if (!(s[i] in obj)) {
+            obj[s[i]] = 1;
+            let iArr = getArr(s[i]);
+            if (iArr.length == 1) {
+              if (re == "") {
+                re = s[iArr[0]];
+              }
+            } else {
+              for (let i = 0; i < iArr.length - 1; i++) {
+                for (let j = iArr.length - 1; j > i; j--) {
+                  if (
+                    re.length < iArr[j] - iArr[i] + 1 &&
+                    judgeStr(iArr[i], iArr[j])
+                  ) {
+                    re = s.substring(iArr[i], iArr[j] + 1);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return re;
+      };
+
+      // 最长回文字符串
+      var longestPalindrome = function (s) {
+        let arr = Array(s.length)
+          .fill(0)
+          .map((it) => Array(s.length));
+        let re = "";
+        for (let i = 0; i < s.length; i++) {
+          for (let j = 0; j <= i; j++) {
+            if (s[i] == s[j]) {
+              arr[i][j] = i - j > 2 ? arr[i - 1][j + 1] : 1;
+            }
+            if (arr[i][j]) {
+              re = re.length > i - j + 1 ? re : s.substring(j, i + 1);
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      6. ZigZag Conversion
+      Example:
+
+        Input: s = "PAYPALISHIRING", numRows = 4
+        Output: "PINALSIGYAHRPI"
+        Explanation:
+
+        P     I    N
+        A   L S  I G
+        Y A   H R
+        P     I
+      */
+
+      // 使用一个二维数组进行存储
+      /*
+      使用规则：
+        二维数组，竖向遍历
+      */
+      var convert = function (s, numRows) {
+        let arr = Array(numRows)
+          .fill(0)
+          .map((it) => []);
+        let max = 0;
+        let pre = 0;
+        let index = 0;
+        while (index < s.length) {
+          if (pre == 0) {
+            for (let i = 0; i < numRows; i++) {
+              arr[i][max] = s[index++];
+            }
+          } else {
+            arr[pre][max] = s[index++];
+          }
+          max++;
+          if (pre == 0) {
+            pre = numRows - 2;
+          } else {
+            pre--;
+          }
+        }
+        let re = "";
+        for (let i = 0; i < numRows; i++) {
+          for (let j = 0; j < max; j++) {
+            if (arr[i][j] != undefined) {
+              re += arr[i][j];
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      7. Reverse Integer
+
+      Example:
+        Input: 120
+        Output: 21
+      */
+
+      var reverse = function (x) {
+        if (x == 0) {
+          return 0;
+        }
+        var temp = Math.abs(x);
+        var sum = 0,
+          a;
+        while (temp > 0) {
+          a = temp % 10;
+          sum = sum * 10 + a;
+          temp = (temp - a) / 10;
+        }
+        if (x < 0) {
+          return -sum < -Math.pow(2, 31) ? 0 : -sum;
+        } else {
+          return sum > Math.pow(2, 31) - 1 ? 0 : sum;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      8. String to Integer (atoi)
+
+      Example:
+
+        Input: "words and 987"
+        Output: 0
+        Explanation: The first non-whitespace character is 'w', which is not a numerical 
+        digit or a +/- sign. Therefore no valid conversion could be performed.
+
+      Example :
+
+        Input: "-91283472332"
+        Output: -2147483648
+        Explanation: The number "-91283472332" is out of the range of a 32-bit signed integer.
+        Thefore INT_MIN (−231) is returned.
+      */
+
+      // 使用正则
+      var myAtoi = function (str) {
+        str = str.trim();
+        let reg = /^([\-\+]?\d+\.?\d*)/;
+        let re = reg.exec(str);
+        if (re) {
+          re = Number(re[1]);
+          if (re > 0 && re > Math.pow(2, 31) - 1) {
+            return Math.pow(2, 31) - 1;
+          } else if (re < 0 && re < -Math.pow(2, 31)) {
+            return -Math.pow(2, 31);
+          }
+          return re;
+        } else {
+          return 0;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      9. Palindrome Number
+      
+      Example:
+        Input: -121
+        Output: false
+        Explanation: From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome.
+      */
+
+      // 判断是否是回文数
+      var isPalindrome = function (x) {
+        x = x + "";
+        var flag = true,
+          start = 0,
+          end = x.length - 1;
+        while (start < end) {
+          if (x[start++] != x[end--]) {
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      };
+    </script>
+
+    <script>
+      /*
+      10. Regular Expression Matching
+
+      '.' Matches any single character.
+      '.' 匹配任何单个字符
+      '*' Matches zero or more of the preceding element.
+      '*' 匹配0个或者多个字符
+
+      Example :
+
+        Input:
+        s = "aab"
+        p = "c*a*b"
+        Output: true
+        Explanation: c can be repeated 0 times, a can be repeated 1 time. Therefore, it matches "aab".
+      */
+
+      // 使用动态规划
+      var isMatch = function (s, p) {
+        if (s == p) {
+          return true;
+        }
+        if (p == "") {
+          return false;
+        }
+        p = p.replace(/(\.\*)+/g, "$1");
+        let regArr = p.match(/([^*](?!\*))|(.\*)/g);
+        regArr.unshift("");
+        let sArr = s.split("");
+        sArr.unshift("");
+        let arr = Array(sArr.length);
+        for (let i = 0; i < sArr.length; i++) {
+          if (!arr[i]) {
+            arr[i] = Array(regArr.length);
+          }
+          for (let j = 0; j < regArr.length; j++) {
+            if (i == 0 && j == 0) {
+              arr[i][j] = true;
+              continue;
+            }
+            if (j == 0 && i != 0) {
+              arr[i][j] = false;
+              continue;
+            }
+            if (i == 0 && j != 0) {
+              if (regArr[j].length == 2) {
+                arr[i][j] = arr[i][j - 1];
+              } else {
+                arr[i][j] = false;
+              }
+              continue;
+            }
+            if (regArr[j].length == 1) {
+              if (regArr[j] == sArr[i] || regArr[j] == ".") {
+                arr[i][j] = arr[i - 1][j - 1];
+              } else {
+                arr[i][j] = false;
+              }
+            } else {
+              if (regArr[j][0] == sArr[i] || regArr[j][0] == ".") {
+                arr[i][j] = arr[i - 1][j - 1] || arr[i][j - 1];
+                if (sArr[i] == sArr[i - 1] || regArr[j][0] == ".") {
+                  arr[i][j] = arr[i][j] || arr[i - 1][j];
+                }
+              } else if (regArr[j][0] != sArr[i]) {
+                arr[i][j] = arr[i][j - 1];
+              }
+            }
+          }
+        }
+        return arr[sArr.length - 1][regArr.length - 1];
+      };
+
+      // 使用递归 记忆数组
+      var isMatch = function (s, p) {
+        let getRe = function (sArr, si, pArr, pi, obj) {
+          if (si == sArr.length && pi == pArr.length) {
+            return true;
+          } else if (si < sArr.length && pi < pArr.length) {
+            if (pArr[pi].length == 1) {
+              if (pArr[pi] == "." || pArr[pi] == sArr[si]) {
+                if (!(si + 1 + ":" + (pi + 1) in obj)) {
+                  obj[si + 1 + ":" + (pi + 1)] = getRe(
+                    sArr,
+                    si + 1,
+                    pArr,
+                    pi + 1,
+                    obj
+                  );
+                }
+                return obj[si + 1 + ":" + (pi + 1)];
+              } else {
+                return false;
+              }
+            } else {
+              if (pArr[pi][0] == sArr[si] || pArr[pi][0] == ".") {
+                if (!(si + 1 + ":" + (pi + 1) in obj)) {
+                  obj[si + 1 + ":" + (pi + 1)] = getRe(
+                    sArr,
+                    si + 1,
+                    pArr,
+                    pi + 1,
+                    obj
+                  );
+                }
+                if (!(si + 1 + ":" + pi in obj)) {
+                  obj[si + 1 + ":" + pi] = getRe(sArr, si + 1, pArr, pi, obj);
+                }
+                if (!(si + ":" + (pi + 1) in obj)) {
+                  obj[si + ":" + (pi + 1)] = getRe(sArr, si, pArr, pi + 1, obj);
+                }
+                return (
+                  obj[si + 1 + ":" + (pi + 1)] ||
+                  obj[si + 1 + ":" + pi] ||
+                  obj[si + ":" + (pi + 1)]
+                );
+              } else {
+                if (!(si + ":" + (pi + 1) in obj)) {
+                  obj[si + ":" + (pi + 1)] = getRe(sArr, si, pArr, pi + 1, obj);
+                }
+                return obj[si + ":" + (pi + 1)];
+              }
+            }
+          } else if (si == sArr.length && pi < pArr.length) {
+            for (let i = pi; i < pArr.length; i++) {
+              if (pArr[i].length == 1) {
+                return false;
+              }
+            }
+            return true;
+          } else {
+            return false;
+          }
+        };
+        if (s == p) {
+          return true;
+        }
+        if (p == "") {
+          return false;
+        }
+        p = p.replace(/(\.\*)+/g, "$1");
+        let regArr = p.match(/([^*]\*?)/g);
+        let sArr = s.split("");
+        return getRe(sArr, 0, regArr, 0, {});
+      };
+
+      // 递归 记忆数组
+      var isMatch = function (s, p) {
+        // 处理p
+        let regArr = p.match(/([^*]\*?)/g);
+        let strArr = s.split("");
+        let obj = {};
+        const getRe = (i, j) => {
+          if (i === regArr.length && j === strArr.length) {
+            return true;
+          }
+          if (i < regArr.length && j < strArr.length) {
+            if (regArr[i].length === 1) {
+              if (regArr[i] === strArr[j] || regArr[i] === ".") {
+                if (!(i + 1 + ":" + (j + 1) in obj)) {
+                  obj[i + 1 + ":" + (j + 1)] = getRe(i + 1, j + 1);
+                }
+                return obj[i + 1 + ":" + (j + 1)];
+              } else {
+                return false;
+              }
+            } else if (regArr[i].length === 2) {
+              if (regArr[i][0] === strArr[j] || regArr[i][0] === ".") {
+                if (!(i + 1 + ":" + (j + 1) in obj)) {
+                  obj[i + 1 + ":" + (j + 1)] = getRe(i + 1, j + 1);
+                }
+                if (!(i + ":" + (j + 1) in obj)) {
+                  obj[i + ":" + (j + 1)] = getRe(i, j + 1);
+                }
+                if (!(i + 1 + ":" + j in obj)) {
+                  obj[i + 1 + ":" + j] = getRe(i + 1, j);
+                }
+                return (
+                  obj[i + 1 + ":" + (j + 1)] ||
+                  obj[i + ":" + (j + 1)] ||
+                  obj[i + 1 + ":" + j]
+                );
+              } else {
+                if (!(i + 1 + ":" + j in obj)) {
+                  obj[i + 1 + ":" + j] = getRe(i + 1, j);
+                }
+                return obj[i + 1 + ":" + j];
+              }
+            }
+          } else if (j === strArr.length) {
+            for (let s = i; s < regArr.length; s++) {
+              if (regArr[s].length !== 2) {
+                return false;
+              }
+            }
+            return true;
+          }
+          return false;
+        };
+        return getRe(0, 0);
+      };
+    </script>
+
+    <script>
+      /*
+      11. Container With Most Water
+
+      Example:
+
+        Input: [1,8,6,2,5,4,8,3,7]
+        Output: 49
+      */
+
+      // 从两边逼近  依次选择最小的开始
+      var maxArea = function (height) {
+        var start = 0,
+          end = height.length - 1,
+          arr = [];
+        while (start < end) {
+          var temp;
+          if (height[start] > height[end]) {
+            temp = height[end--];
+          } else {
+            temp = height[start++];
+          }
+          arr.push(temp * (end - start + 1));
+        }
+        return Math.max(...arr);
+      };
+    </script>
+
+    <script>
+      /*
+      12. Integer to Roman
+      Example:
+
+        Input: 1994
+        Output: "MCMXCIV"
+        Explanation: M = 1000, CM = 900, XC = 90 and IV = 4.
+      */
+
+      var intToRoman = function (num) {
+        function getRoman(char) {
+          switch (char) {
+            case 1:
+              return "I";
+            case 5:
+              return "V";
+            case 10:
+              return "X";
+            case 50:
+              return "L";
+            case 100:
+              return "C";
+            case 500:
+              return "D";
+            case 1000:
+              return "M";
+          }
+        }
+
+        function getLen(num) {
+          let re = 0;
+          while (num > 0) {
+            num = (num / 10) | 0;
+            re++;
+          }
+          return re;
+        }
+
+        let len = getLen(num);
+        let temp = Math.pow(10, len - 1);
+        let re = "";
+        while (num > 0) {
+          let current = (num / temp) | 0;
+          if (current < 4) {
+            re += getRoman(temp).repeat(current);
+          } else if (current == 4) {
+            re += getRoman(temp);
+            re += getRoman(temp * 5);
+          } else if (current < 9) {
+            re += getRoman(temp * 5);
+            re += getRoman(temp).repeat(current - 5);
+          } else {
+            re += getRoman(temp);
+            re += getRoman(temp * 10);
+          }
+          num %= temp;
+          temp /= 10;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      13. Roman to Integer
+        Example:
+
+        Input: "MCMXCIV"
+        Output: 1994
+        Explanation: M = 1000, CM = 900, XC = 90 and IV = 4.
+      */
+
+      // 将罗马数字转换为十进制数,从左向右读取,前一个大于后一个执行加法,反之执行减法
+      var romanToInt = function (s) {
+        function getNum(char) {
+          switch (char) {
+            case "I":
+              return 1;
+            case "V":
+              return 5;
+            case "X":
+              return 10;
+            case "L":
+              return 50;
+            case "C":
+              return 100;
+            case "D":
+              return 500;
+            case "M":
+              return 1000;
+          }
+        }
+        let re = 0;
+        for (let i = 0; i < s.length; i++) {
+          let current = getNum(s[i]);
+          if (i + 1 < s.length) {
+            let next = getNum(s[i + 1]);
+            if (current < next) {
+              current = next - current;
+              i++;
+            }
+          }
+          re += current;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      14. Longest Common Prefix
+
+      Example:
+
+        Input: ["flower","flow","flight"]
+        Output: "fl"
+      */
+
+      var longestCommonPrefix = function (strs) {
+        if (strs.length == 0) {
+          return "";
+        }
+        if (strs.length == 1) {
+          return strs[0];
+        }
+        let target = strs[0];
+        if (target.length == 0) {
+          return "";
+        } else {
+          let index = 0;
+          while (true) {
+            for (let i = 1; i < strs.length; i++) {
+              if (strs[i][index] != target[index] || index == strs[i].length) {
+                return target.substring(0, index);
+              }
+            }
+            index++;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      15. 3Sum
+
+      Example:
+
+        Given array nums = [-1, 0, 1, 2, -1, -4],
+
+        A solution set is:
+        [
+          [-1, 0, 1],
+          [-1, -1, 2]
+        ]
+      */
+
+      var threeSum = function (nums) {
+        // 先排序，再进行输出
+        nums.sort((n1, n2) => (n1 > n2 ? 1 : -1));
+        let pre = null;
+        let re = [];
+        for (let i = 0; i < nums.length - 2; i++) {
+          if (nums[i] > 0) {
+            break;
+          } else {
+            if (pre !== null && pre === nums[i]) {
+              continue;
+            } else {
+              pre = nums[i];
+              let temp = {};
+              let target = 0 - nums[i];
+              let start = i + 1;
+              let end = nums.length - 1;
+              while (end > start) {
+                if (nums[end] + nums[start] === target) {
+                  temp[nums[start]] = nums[end];
+                  let cStart = start + 1;
+                  let cEnd = end - 1;
+                  while (nums[cStart] === nums[start]) {
+                    cStart++;
+                  }
+                  while (nums[cEnd] === nums[end]) {
+                    cEnd++;
+                  }
+                  start = cStart;
+                  end = cEnd;
+                } else if (nums[end] + nums[start] > target) {
+                  end--;
+                } else if (nums[end] + nums[start] < target) {
+                  start++;
+                }
+              }
+              re = re.concat(
+                Object.keys(temp).map((it) => [nums[i], +it, temp[it]])
+              );
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      17. Letter Combinations of a Phone Number
+      Example:
+
+        Input: "23"
+        Output: ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"].
+      */
+
+      // 电话号码组合   使用按层遍历
+      var letterCombinations = function (digits) {
+        var getChars = function (num) {
+          switch (num[0]) {
+            case "2":
+              return "abc";
+            case "3":
+              return "def";
+            case "4":
+              return "ghi";
+            case "5":
+              return "jkl";
+            case "6":
+              return "mno";
+            case "7":
+              return "pqrs";
+            case "8":
+              return "tuv";
+            case "9":
+              return "wxyz";
+            default:
+              return "";
+          }
+        };
+
+        if (digits < 1) {
+          return [];
+        }
+        let re = [];
+        var getRe = function (n = digits, str = "") {
+          if (str.length == digits.length) {
+            re.push(str);
+          } else {
+            let src = getChars(n);
+            for (var i = 0; i < src.length; i++) {
+              getRe(n.substr(1), str + src[i]);
+            }
+          }
+        };
+        getRe();
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      19. Remove Nth Node From End of List
+      Example:
+
+        Given linked list: 1->2->3->4->5, and n = 2.
+        After removing the second node from the end, the linked list becomes 1->2->3->5.
+      */
+      // 快慢指针
+
+      // 使用递归
+      var removeNthFromEnd = function (head, n) {
+        let getListLen = function (node) {
+          let re = 0;
+          if (!node) {
+            return re;
+          }
+          let slow = node,
+            fast = node;
+          while (fast && fast.next && fast.next.next) {
+            slow = slow.next;
+            fast = fast.next.next;
+            re += 2;
+          }
+          if (fast) {
+            re++;
+          }
+          if (fast.next) {
+            re++;
+          }
+          return re;
+        };
+        let len = getListLen(head);
+        let getRe = function (node, count) {
+          if (node) {
+            if (count + n < len) {
+              node.next = getRe(node.next, count + 1);
+              return node;
+            } else {
+              return node.next;
+            }
+          } else {
+            return node;
+          }
+        };
+        return getRe(head, 0);
+      };
+
+      // 使用循环
+      var removeNthFromEnd = function (head, n) {
+        if (n == 0) {
+          return head;
+        }
+        let arr = [];
+        let temp = head;
+        while (temp) {
+          arr.push(temp);
+          temp = temp.next;
+        }
+        if (n == arr.length) {
+          return arr[1];
+        } else {
+          arr[arr.length - n - 1].next = arr[arr.length - n + 1]
+            ? arr[arr.length - n + 1]
+            : null;
+          return head;
+        }
+      };
+
+      // 使用双指针
+      var removeNthFromEnd = function (head, n) {
+        if (head) {
+          let temp = new ListNode(-1);
+          temp.next = head;
+          let slow = temp;
+          let fast = temp;
+          let i = 0;
+          while (fast.next) {
+            if (i >= n) {
+              slow = slow.next;
+            }
+            i++;
+            fast = fast.next;
+          }
+          if (slow && slow === temp) {
+            // 说明n的长度和链表一样长
+            return head.next;
+          } else {
+            // 判断需要删除的链表节点是否存在
+            slow.next = slow.next ? slow.next.next : null;
+            return head;
+          }
+        } else {
+          return head;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      20. Valid Parentheses
+      Example:
+
+        Input: "()[]{}"
+        Output: true
+      */
+
+      // 有效括号   使用栈
+      var isValid = function (s) {
+        var arr = [];
+        for (var i = 0; i < s.length; i++) {
+          if (s[i] == arr[arr.length - 1]) {
+            arr.pop();
+          } else {
+            arr.push(getOther(s[i]));
+          }
+        }
+        return arr.length == 0;
+      };
+
+      var getOther = function (s) {
+        switch (s) {
+          case "(":
+            return ")";
+          case ")":
+            return "(";
+          case "[":
+            return "]";
+          case "]":
+            return "[";
+          case "{":
+            return "}";
+          case "}":
+            return "{";
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      21. Merge Two Sorted Lists
+      Example:
+
+        Input: 1->2->4, 1->3->4
+        Output: 1->1->2->3->4->4
+      */
+      // 使用循环
+      var mergeTwoLists = function (l1, l2) {
+        var tempBefore = new ListNode(-1),
+          tempNext = null;
+        headPre = tempBefore;
+        while (l1 && l2) {
+          if (l1.val > l2.val) {
+            tempNext = l2;
+            l2 = l2.next;
+          } else {
+            tempNext = l1;
+            l1 = l1.next;
+          }
+          tempBefore.next = tempNext;
+          tempBefore = tempNext;
+        }
+        if (l1) {
+          tempBefore.next = l1;
+        } else {
+          tempBefore.next = l2;
+        }
+        return headPre.next;
+      };
+
+      // 使用递归
+      var mergeTwoListsFunction = function (l1, l2) {
+        if (!l1) {
+          return l2;
+        }
+
+        if (!l2) {
+          return l1;
+        }
+        var head = null;
+        if (l1.val > l2.val) {
+          head = l2;
+          head.next = mergeTwoListsFunction(l1, l2.next);
+        } else {
+          head = l1;
+          head.next = mergeTwoListsFunction(l1.next, l2);
+        }
+        return head;
+      };
+    </script>
+
+    <script>
+      /*
+      22. Generate Parentheses
+      For example, given n = 3, a solution set is:
+
+        [
+          "((()))",
+          "(()())",
+          "(())()",
+          "()(())",
+          "()()()"
+        ]
+      */
+
+      // 使用递归，对于当前情况进行判断 然后依次选择其中的情况继续执行
+
+      // 使用递归
+      var generateParenthesis = function (n) {
+        let getRe = function (left, right, current, re) {
+          if (left == 0 && right == 0) {
+            re.push(current);
+          } else if (left == 0 && right > 0) {
+            getRe(left, right - 1, current + ")", re);
+          } else if (left > 0 && right > 0) {
+            if (left == right) {
+              getRe(left - 1, right, current + "(", re);
+            } else if (left < right) {
+              getRe(left - 1, right, current + "(", re);
+              getRe(left, right - 1, current + ")", re);
+            }
+          }
+        };
+        let re = [];
+        getRe(n, n, "", re);
+        return re;
+      };
+
+      // 生成符合要求的结果，记录下（的个数
+      // 当前如果（没有到最大可以加（或者）
+      var generateParenthesis = function (n) {
+        let re = [];
+        const getRe = (left, right, str) => {
+          if (str.length === n * 2) {
+            re.push(str);
+          } else {
+            if (right < left) {
+              if (left < n) {
+                getRe(left + 1, right, str + "(");
+                getRe(left, right + 1, str + ")");
+              } else {
+                getRe(left, right + 1, str + ")");
+              }
+            } else {
+              getRe(left + 1, right, str + "(");
+            }
+          }
+        };
+        getRe(0, 0, "");
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      23. Merge k Sorted Lists
+      Example:
+
+        Input:
+        [
+          1->4->5,
+          1->3->4,
+          2->6
+        ]
+        Output: 1->1->2->3->4->4->5->6
+      */
+
+      var mergeTwoListsFunction = function (l1, l2) {
+        if (!l1) {
+          return l2;
+        }
+
+        if (!l2) {
+          return l1;
+        }
+        var head = null;
+        if (l1.val > l2.val) {
+          head = l2;
+          head.next = mergeTwoListsFunction(l1, l2.next);
+        } else {
+          head = l1;
+          head.next = mergeTwoListsFunction(l1.next, l2);
+        }
+        return head;
+      };
+      var mergeKLists = function (lists) {
+        if (lists.length == 0) {
+          return null;
+        }
+        if (lists.length < 2) {
+          return mergeTwoListsFunction(lists[0], null);
+        } else if (lists.length == 2) {
+          return mergeTwoListsFunction(lists[0], lists[1]);
+        } else {
+          var l1 = lists.pop();
+          var l2 = lists.pop();
+          lists.push(mergeTwoListsFunction(l1, l2));
+          return mergeKLists(lists);
+        }
+      };
+
+      // 使用递归
+      var mergeKLists = function (lists) {
+        let headTemp = new ListNode(-1);
+        let temp = headTemp;
+        let getRe = function (temp) {
+          let min = Infinity;
+          for (let i = 0; i < lists.length; i++) {
+            if (lists[i]) {
+              min = min > lists[i].val ? lists[i].val : min;
+            }
+          }
+          if (min == Infinity) {
+            return;
+          }
+          for (let i = 0; i < lists.length; i++) {
+            if (lists[i] && min == lists[i].val) {
+              temp.next = lists[i];
+              temp = lists[i];
+              lists[i] = lists[i].next;
+            }
+          }
+          getRe(temp);
+        };
+        getRe(temp);
+        return headTemp.next;
+      };
+
+      // 使用归并的思想
+      var mergeKLists = function (lists) {
+        let getRe = function (start = 0, end = lists.length - 1) {
+          if (end < start) {
+            return null;
+          }
+          if (end == start) {
+            return lists[start];
+          }
+          let m = ((end + start) / 2) | 0;
+          let left = getRe(start, m);
+          let right = getRe(m + 1, end);
+          if (left == null) {
+            return right;
+          } else if (right == null) {
+            return left;
+          } else {
+            let head = null;
+            let temp;
+            if (left.val < right.val) {
+              head = left;
+              left = left.next;
+            } else {
+              head = right;
+              right = right.next;
+            }
+            temp = head;
+            while (left && right) {
+              if (left.val < right.val) {
+                temp.next = left;
+                temp = left;
+                left = left.next;
+              } else {
+                temp.next = right;
+                temp = right;
+                right = right.next;
+              }
+            }
+            if (left) {
+              temp.next = left;
+            } else {
+              temp.next = right;
+            }
+            return head;
+          }
+        };
+        return getRe();
+      };
+
+      // 改良使用递归
+      var mergeKLists = function (lists) {
+        const getRe = (lists) => {
+          let re = new ListNode(Infinity);
+          let index = null;
+          for (let i = 0; i < lists.length; i++) {
+            if (lists[i]) {
+              re = re.val > lists[i].val ? ((index = i), lists[i]) : re;
+            }
+          }
+          if (re.val === Infinity) {
+            return null;
+          } else {
+            lists[i] = lists[i].next;
+            return re;
+          }
+        };
+        let head = new ListNode(-1);
+        let current = head;
+        while (true) {
+          const temp = getRe(lists);
+          if (temp) {
+            current.next = temp;
+            current = current.next;
+          } else {
+            return head.next;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      24. Swap Nodes in Pairs
+      Example:
+
+        Given 1->2->3->4, you should return the list as 2->1->4->3.
+      */
+      var swapPairs = function (head) {
+        var temp = new ListNode(-1);
+        temp.next = head;
+        var a = null,
+          b = temp,
+          c = null;
+        var flag = true;
+        while (b.next && b.next.next) {
+          a = b;
+          b = b.next;
+          c = b.next;
+          b.next = c.next;
+          c.next = b;
+          a.next = c;
+          if (flag) {
+            head = c;
+            flag = false;
+          }
+        }
+        return head;
+      };
+
+      // 使用递归
+      var swapPairs = function (head) {
+        let getRe = function (current, next) {
+          if (current && next) {
+            let gNext = next.next;
+            next.next = current;
+            current.next = getRe(gNext, gNext ? gNext.next : null);
+            return next;
+          } else {
+            return current;
+          }
+        };
+        return getRe(head, head ? head.next : null);
+      };
+
+      // 翻转链表的相邻两个
+      var swapPairs = function (head) {
+        const getRe = (current, next) => {
+          if (current && next) {
+            const nextCurrent = next.next;
+            next.next = current;
+            current.next = getRe(
+              nextCurrent,
+              nextCurrent ? nextCurrent.next : null
+            );
+            return next;
+          } else {
+            return current;
+          }
+        };
+        return getRe(head, head ? head.next : null);
+      };
+    </script>
+
+    <script>
+      /*
+      25. Reverse Nodes in k-Group
+      Example:
+
+        Given this linked list: 1->2->3->4->5
+
+        For k = 2, you should return: 2->1->4->3->5
+
+        For k = 3, you should return: 3->2->1->4->5
+      */
+      // 使用递归
+      var reverseKGroup = function (head, k) {
+        if (k == 1) {
+          return head;
+        }
+        let getRe = function (node) {
+          let temp = node;
+          let arr = [];
+          let len = 0;
+          while (node && len < k) {
+            arr.push(node);
+            node = node.next;
+            len++;
+          }
+          if (arr.length < k) {
+            return temp;
+          } else {
+            for (let i = k - 1; i > 0; i--) {
+              arr[i].next = arr[i - 1];
+            }
+            arr[0].next = getRe(node);
+            return arr[k - 1];
+          }
+        };
+        return getRe(head);
+      };
+    </script>
+
+    <script>
+      /*
+      26. Remove Duplicates from Sorted Array
+      Example:
+
+        Given nums = [0,0,1,1,1,2,2,3,3,4],
+
+        Your function should return length = 5, with the first five elements of nums being modified to 0, 1, 2, 3, and 4 respectively.
+
+        It doesn't matter what values are set beyond the returned length.
+      */
+      // 移动
+      var removeDuplicates = function (nums) {
+        let moveOne = function (start, end) {
+          while (start < end) {
+            nums[start] = nums[start + 1];
+            start++;
+          }
+        };
+        let len = nums.length;
+        for (let i = 0; i < len - 1; i++) {
+          if (nums[i] == nums[i + 1]) {
+            moveOne(i + 1, len);
+            len--;
+            i--;
+          }
+        }
+        return len;
+      };
+
+      // 记录位置交换  好像这种方法是最优解
+      var removeDuplicates = function (nums) {
+        if (nums == null) {
+          return 0;
+        }
+        if (nums.length == 1) {
+          return 1;
+        }
+        var temp1 = nums[0],
+          temp2Index = 1,
+          temp2 = nums[temp2Index],
+          count = 1;
+        // 每次迭代更新temp2  每次迭代判断是否当前temp1与temp2相同 不相同更新temp1与增加count
+        while (temp2Index < nums.length) {
+          if (temp2 != temp1) {
+            nums[count++] = temp2;
+            temp1 = temp2;
+          }
+          temp2 = nums[++temp2Index];
+        }
+        return count;
+      };
+    </script>
+
+    <script>
+      /*
+      27. Remove Element
+      Example:
+
+        Given nums = [0,1,2,2,3,0,4,2], val = 2,
+
+        Your function should return length = 5, with the first five elements of nums containing 0, 1, 3, 0, and 4.
+
+        Note that the order of those five elements can be arbitrary.
+
+        It doesn't matter what values are set beyond the returned length.
+      */
+      var removeElement = function (nums, val) {
+        let count = 0;
+        let len = nums.length - 1;
+        for (let i = 0; i <= len; i++) {
+          if (nums[i] == val) {
+            while (nums[len] == val) {
+              len--;
+            }
+            if (len <= i) {
+              break;
+            }
+            nums[i] = nums[len];
+            len--;
+          }
+          count++;
+        }
+        return count;
+      };
+      var removeElement = function (nums, val) {
+        var temp1,
+          tempIndex = nums.length - 1,
+          temp2,
+          len = 0,
+          count = 0;
+        while (len < nums.length) {
+          temp1 = nums[len];
+          if (temp1 != val) {
+            count++;
+          } else {
+            if (tempIndex > len) {
+              temp2 = nums[tempIndex];
+              while (temp2 == val && tempIndex > len) {
+                temp2 = nums[--tempIndex];
+              }
+              if (temp2 != val) {
+                nums[len] = temp2;
+                nums[tempIndex] = val;
+                count++;
+              }
+            }
+          }
+          len++;
+        }
+        return count;
+      };
+
+      var removeElement = function (nums, val) {
+        let i = 0;
+        let end = nums.length - 1;
+        while (nums[end] === val) {
+          end--;
+        }
+        for (let i = 0; i <= end; i++) {
+          if (nums[i] === val) {
+            if (i >= end) {
+              break;
+            } else {
+              nums[i] = nums[end];
+            }
+            end--;
+          }
+        }
+        return i;
+      };
+    </script>
+
+    <script>
+      /*
+      28. Implement strStr()
+      Example:
+
+        Input: haystack = "hello", needle = "ll"
+        Output: 2
+      */
+
+      // todo  KMP 算法
+      var strStr = function (haystack, needle) {
+        if (needle == "") {
+          return 0;
+        }
+        var arr = haystack.split(needle);
+        if (arr.length == 1) {
+          return -1;
+        } else {
+          return arr[0].length;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      29. Divide Two Integers
+      Example:
+
+        Input: dividend = 7, divisor = -3
+        Output: -2
+        100 - 001 = 011
+      */
+
+      /*
+      1. 通过被除数减去除数来得到被除数中包含多少个除数，一直减到被除数小于等于 0 则计算完成；
+      2. 如果是一个很大的被除数除以很小的除数，那么必然会超时（如 0x7FFFFFFF 除以 1 ，每次减 1 要减 20 亿次）；
+      3. 为加速进行减法，每减一次除数，都将除数加倍，相应得本次除数包含的原始除数的个数是上一次除数包含的原始除数的个数的 2 倍；
+      4. 当被除数减到正好为零时，就正好得到结果；
+      5. 当被除数小于零时，判断当前的除数是否是原始的除数，如果是，那么说明被除数已经被减完，余下的部分已经不足以除以原始除数，所以直接返回结果；
+      6. 如果当前除数不是原始除数，那么说明除数剩余的本分还能够被原始除数除；
+      7. 在 6 步的情况下，求解新的被除数除以除数的问题和原始的问题是一个问题（问题规模减小了），所以此时可以进行递归求解（第一种方法），也可以非递归求解（第二种解法）；
+      8. 问题还需要注意的地方有：
+          a. 若除数为 0 ，则直接返回无穷大（（int）0x7FFFFFFF）；
+          b. 若结果溢出，则返回相应的正的最大值（（int）0x7FFFFFFF）或负的最大值（（int）0x80000000）;
+      9. 不能直接左移 递增比较合适
+      */
+      var divide = function (dividend, divisor) {
+        // 使用递归加上减法
+        const getRe = (count, num) => {
+          let re = 1;
+          // let left = 1;
+          if (count < num) {
+            return 0;
+          }
+          while (count >= num + num) {
+            // left += left;
+            num += num;
+            re += re;
+          }
+          return re + getRe(count - num, Math.abs(divisor));
+        };
+        if (dividend === 0) {
+          return 0;
+        }
+        let re = getRe(Math.abs(dividend), Math.abs(divisor));
+        re =
+          (dividend > 0 && divisor < 0) || (dividend < 0 && divisor > 0)
+            ? -re
+            : re;
+
+        if (re > Math.pow(2, 31) - 1) {
+          return Math.pow(2, 31) - 1;
+        } else if (re < -Math.pow(2, 31)) {
+          return -Math.pow(2, 31);
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      30. Substring with Concatenation of All Words
+      Example:
+
+        Input:
+          s = "barfoothefoobarman",
+          words = ["foo","bar"]
+        Output: [0,9]
+        Explanation: Substrings starting at index 0 and 9 are "barfoo" and "foobar" respectively.
+        The output order does not matter, returning [9,0] is fine too.
+      */
+
+      // 使用滑动窗口
+
+      // 并没有想到其他简单的办法
+      var findSubstring = function (s, words) {
+        let obj = {};
+        words.forEach((it) => {
+          if (it in obj) {
+            obj[it]++;
+          } else {
+            obj[it] = 1;
+          }
+        });
+
+        // 判断当前对象是否完全包含目标对象
+        function judgeFun(obj, temp) {
+          for (let key in obj) {
+            if (!(key in temp)) {
+              return false;
+            }
+            if (temp[key] < obj[key]) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        let allLength = words[0].length * words.length;
+
+        let wordLength = words[0].length;
+
+        // 对于每一位创建一个对象，从当前索引开始进行匹配
+        let currentObject = Array(wordLength)
+          .fill(0)
+          .map((it) => {
+            return {};
+          });
+
+        // 用于记录同级的左右指针位置
+        let leftArr = Array(wordLength)
+          .fill(0)
+          .map((_, index) => index);
+        let rightArr = Array(wordLength)
+          .fill(0)
+          .map((_, index) => index);
+        let re = [];
+        let temp = 0;
+
+        while (temp < s.length) {
+          currentObject.forEach((it, index) => {
+            if (rightArr[index] + wordLength <= s.length) {
+              let str = s.slice(rightArr[index], rightArr[index] + wordLength);
+              if (str in it) {
+                it[str]++;
+              } else {
+                it[str] = 1;
+              }
+              rightArr[index] += wordLength;
+              while (
+                rightArr[index] - leftArr[index] >= allLength &&
+                judgeFun(obj, it)
+              ) {
+                if (rightArr[index] - leftArr[index] == allLength) {
+                  re.push(leftArr[index]);
+                }
+                let str = s.slice(leftArr[index], leftArr[index] + wordLength);
+                leftArr[index] += wordLength;
+                it[str]--;
+              }
+            }
+          });
+          temp += wordLength;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      31. Next Permutation
+
+        1,2,3 → 1,3,2
+        3,2,1 → 1,2,3
+        1,1,5 → 1,5,1
+      */
+      // 从后向前遍历,如果已经是一个升序，则需要整体翻转
+      var nextPermutation = function (nums) {
+        function swap(arr, i, j) {
+          let temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
+        }
+
+        function reverse(arr, i, j) {
+          while (i > j) {
+            swap(arr, i, j);
+            i--;
+            j++;
+          }
+        }
+
+        for (let i = nums.length - 1; i > 0; i--) {
+          if (nums[i] <= nums[i - 1]) {
+            continue;
+          } else {
+            for (let j = nums.length - 1; j >= i; j--) {
+              // 找出第一个比nums[i - 1]大的数  进行交换  后续反转
+              if (nums[j] > nums[i - 1]) {
+                // 交换i, j
+                swap(nums, i - 1, j);
+                // 翻转nums.length - 1 到 i
+                reverse(nums, nums.length - 1, i);
+                return;
+              }
+            }
+          }
+        }
+        nums.reverse();
+      };
+    </script>
+
+    <script>
+      /*
+      32. Longest Valid Parentheses
+
+      Example:
+        
+        Input: ")()())"
+        Output: 4
+        Explanation: The longest valid parentheses substring is "()()"
+      */
+
+      // 常规解法
+      var longestValidParentheses = function (s) {
+        let arr = Array(s.length);
+        // 标记最近的括号
+        let fillArr = function (end) {
+          for (let i = end - 1; i >= 0; i--) {
+            if (!arr[i] && s[i] == "(") {
+              arr[i] = 1;
+              arr[end] = 1;
+              break;
+            }
+          }
+        };
+        for (let i = 1; i < s.length; i++) {
+          if (s[i] == ")") {
+            fillArr(i);
+          }
+        }
+        let max = 0;
+        let count = 0;
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i]) {
+            count++;
+          } else {
+            max = max > count ? max : count;
+            count = 0;
+          }
+        }
+        max = max > count ? max : count;
+        return max;
+      };
+    </script>
+
+    <script>
+      /*
+      33. Search in Rotated Sorted Array
+
+      Example:
+
+        Input: nums = [4,5,6,7,0,1,2], target = 0
+        Output: 4
+      */
+      var search = function (nums, target) {
+        var index = arrSearch(nums, 0, nums.length - 1, target);
+        return index === false ? -1 : index;
+      };
+
+      var arrSearch = function (arr, start, end, target) {
+        if (start == end) {
+          if (arr[start] == target) {
+            return start + "";
+          } else {
+            return false;
+          }
+        }
+        var m = ((start + end) / 2) | 0;
+        return (
+          arrSearch(arr, start, m, target) || arrSearch(arr, m + 1, end, target)
+        );
+      };
+
+      // 使用二分  有序的部分直接查找，无序的部分继续找有序二分
+      var search = function (nums, target) {};
+    </script>
+
+    <script>
+      /*
+      34. Find First and Last Position of Element in Sorted Array
+      Example:
+
+        Input: nums = [5,7,7,8,8,10], target = 8
+        Output: [3,4]
+      */
+
+      // 使用二分
+      var searchRange = function (nums, target) {
+        let getIndex = function (start, end) {
+          if (start > end) {
+            return [-1, -1];
+          }
+          let m = ((start + end) / 2) | 0;
+          if (nums[m] == target) {
+            let t = m;
+            let re = [];
+            while (t >= 0 && nums[t] == target) {
+              t--;
+            }
+            re.push(t + 1);
+            while (m < nums.length && nums[m] == target) {
+              m++;
+            }
+            re.push(m - 1);
+            return re;
+          } else if (nums[m] > target) {
+            return getIndex(start, m - 1);
+          } else {
+            return getIndex(m + 1, end);
+          }
+        };
+        return getIndex(0, nums.length);
+      };
+    </script>
+
+    <script>
+      /*
+      35. Search Insert Position
+      Example:
+
+        Input: [1,3,5,6], 2
+        Output: 1
+      */
+
+      var searchInsert = function (nums, target) {
+        var start = 0,
+          end = nums.length - 1;
+        while (start <= end) {
+          var m = ((start + end) / 2) | 0;
+          if (nums[m] == target) {
+            return m;
+          } else if (nums[m] > target) {
+            end = m - 1;
+          } else {
+            start = m + 1;
+          }
+        }
+        return start;
+      };
+    </script>
+
+    <script>
+      /*
+      36. Valid Sudoku
+      Determine if a 9x9 Sudoku board is valid. Only the filled cells need to be validated according to the following rules:
+
+        1.Each row must contain the digits 1-9 without repetition.
+        2.Each column must contain the digits 1-9 without repetition.
+        3.Each of the 9 3x3 sub-boxes of the grid must contain the digits 1-9 without repetition.
+      */
+
+      var isValidSudoku = function (board) {
+        let rowObj = {};
+        let colObj = {};
+        let getRe = function (row, col, obj) {
+          if (row >= board.length || col >= board[0].length) {
+            return true;
+          }
+          let temp = {};
+          for (let i = row; i < row + 3; i++) {
+            for (let j = col; j < col + 3; j++) {
+              if (board[i][j] != ".") {
+                let rowKey = i + ":" + board[i][j];
+                let colKey = j + ":" + board[i][j];
+                if (
+                  rowKey in rowObj ||
+                  colKey in colObj ||
+                  board[i][j] in temp
+                ) {
+                  return false;
+                }
+                rowObj[rowKey] = i;
+                colObj[colKey] = j;
+                temp[board[i][j]] = 1;
+              }
+            }
+          }
+          let key1 = row + 3 + ":" + col;
+          let key2 = row + ":" + (col + 3);
+          if (!(key1 in obj)) {
+            obj[key1] = getRe(row + 3, col, obj);
+          }
+          if (!(key2 in obj)) {
+            obj[key2] = getRe(row, col + 3, obj);
+          }
+          return obj[key1] && obj[key2];
+        };
+        return getRe(0, 0, {});
+      };
+
+      // 递归 + 记忆数组
+      var isValidSudoku = function (board) {
+        const rowArrs = Array(board.length + 1)
+          .fill(0)
+          .map((i) => Array(board[0].length + 1));
+        const colArrs = Array(board.length + 1)
+          .fill(0)
+          .map((i) => Array(board[0].length + 1));
+        const getRe = function (row, col, obj) {
+          const key = row + ":" + col;
+          if (key in obj) {
+            return obj[key];
+          }
+          if (row === board.length || col === board.length) {
+            return true;
+          }
+          const temp = Array(10);
+          for (let i = row; i < row + 3; i++) {
+            for (let j = col; j < col + 3; j++) {
+              if (board[i][j] !== ".") {
+                if (
+                  temp[board[i][j]] ||
+                  rowArrs[i][board[i][j]] ||
+                  colArrs[j][board[i][j]]
+                ) {
+                  obj[key] = false;
+                  return false;
+                } else {
+                  temp[board[i][j]] = 1;
+                  rowArrs[i][board[i][j]] = 1;
+                  colArrs[j][board[i][j]] = 1;
+                }
+              }
+            }
+          }
+          obj[key] = true;
+          return getRe(row, col + 3, obj) && getRe(row + 3, col, obj);
+        };
+        return getRe(0, 0, obj);
+      };
+      var arr = [
+        ["5", "3", ".", ".", "7", ".", ".", ".", "."],
+        ["6", ".", ".", "1", "9", "5", ".", ".", "."],
+        [".", "9", "8", ".", ".", ".", ".", "6", "."],
+        ["8", ".", ".", ".", "6", ".", ".", ".", "3"],
+        ["4", ".", ".", "8", ".", "3", ".", ".", "1"],
+        ["7", ".", ".", ".", "2", ".", ".", ".", "6"],
+        [".", "6", ".", ".", ".", ".", "2", "8", "."],
+        [".", ".", ".", "4", "1", "9", ".", ".", "5"],
+        [".", ".", ".", ".", "8", ".", ".", "7", "9"],
+      ];
+    </script>
+
+    <script>
+      /*
+      37. Sudoku Solver
+      A sudoku solution must satisfy all of the following rules:
+
+        Each of the digits 1-9 must occur exactly once in each row.
+        Each of the digits 1-9 must occur exactly once in each column.
+        Each of the the digits 1-9 must occur exactly once in each of the 9 3x3 sub-boxes of the grid.
+      */
+
+      var solveSudoku = function (board) {
+        let rowArr = Array(10);
+        let colArr = Array(10);
+
+        // 先存储初始状态
+        for (let i = 0; i < board.length; i++) {
+          for (let j = 0; j < board[0].length; j++) {
+            if (!rowArr[i]) {
+              rowArr[i] = Array(10);
+            }
+            if (!colArr[j]) {
+              colArr[j] = Array(10);
+            }
+            if (board[i][j] != ".") {
+              rowArr[i][board[i][j]] = 1;
+              colArr[j][board[i][j]] = 1;
+            }
+          }
+        }
+
+        // 每一个新开始的二维数组   先收集数据
+        let getObj = function (row, col) {
+          let re = {};
+          for (let i = row; i < row + 3; i++) {
+            for (let j = col; j < col + 3; j++) {
+              if (board[i][j] != ".") {
+                re[board[i][j]] = 1;
+              }
+            }
+          }
+          return re;
+        };
+
+        // 根据当前状况  决定下一步
+        let goNext = function (row, col, rowTarget, colTarget, obj) {
+          if (col == colTarget - 1) {
+            if (row == rowTarget - 1) {
+              if (colTarget == 9) {
+                getRe(rowTarget, 0, rowTarget + 3, 3, null);
+              } else {
+                getRe(rowTarget - 3, colTarget, rowTarget, colTarget + 3, null);
+              }
+            } else {
+              getRe(row + 1, colTarget - 3, rowTarget, colTarget, obj);
+            }
+          } else {
+            getRe(row, col + 1, rowTarget, colTarget, obj);
+          }
+        };
+
+        let flag = true;
+
+        let getRe = function (
+          row = 0,
+          col = 0,
+          rowTarget = 3,
+          colTarget = 3,
+          obj = null
+        ) {
+          if (!obj) {
+            obj = getObj(row, col);
+          }
+          if (board[row][col] == ".") {
+            for (let k = 1; k < 10; k++) {
+              if (!obj[k] && !rowArr[row][k] && !colArr[col][k]) {
+                board[row][col] = k + "";
+                obj[k] = 1;
+                rowArr[row][k] = 1;
+                colArr[col][k] = 1;
+                if (row == board.length - 1 && col == board[0].length - 1) {
+                  flag = false;
+                  return;
+                }
+                goNext(row, col, rowTarget, colTarget, obj);
+                if (flag) {
+                  board[row][col] = ".";
+                  obj[k] = 0;
+                  rowArr[row][k] = 0;
+                  colArr[col][k] = 0;
+                }
+              }
+            }
+          } else {
+            if (row == board.length - 1 && col == board[0].length - 1) {
+              flag = false;
+              return;
+            } else {
+              goNext(row, col, rowTarget, colTarget, obj);
+            }
+          }
+        };
+        getRe();
+      };
+
+      var board = [
+        ["5", "3", ".", ".", "7", ".", ".", ".", "."],
+        ["6", ".", ".", "1", "9", "5", ".", ".", "."],
+        [".", "9", "8", ".", ".", ".", ".", "6", "."],
+        ["8", ".", ".", ".", "6", ".", ".", ".", "3"],
+        ["4", ".", ".", "8", ".", "3", ".", ".", "1"],
+        ["7", ".", ".", ".", "2", ".", ".", ".", "6"],
+        [".", "6", ".", ".", ".", ".", "2", "8", "."],
+        [".", ".", ".", "4", "1", "9", ".", ".", "5"],
+        [".", ".", ".", ".", "8", ".", ".", "7", "9"],
+      ];
+
+      // solveSudoku(board);
+    </script>
+
+    <script>
+      /*
+      38. Count and Say
+
+      Example:
+
+        Input: 4
+        Output: "1211"
+        Explanation: For n = 3 the term was "21" in which we have two groups "2" and "1", "2" can be read as "12" which means frequency = 1 and value = 2, the same way "1" is read as "11", so the answer is the concatenation of "12" and "11" which is "1211".
+      */
+
+      var countAndSay = function (n) {
+        let getRe = function (current, str) {
+          if (current == n) {
+            return str;
+          } else {
+            let nextStr = "";
+            for (let i = 0; i < str.length; i++) {
+              let temp = 1;
+              while (str[i] == str[i + 1]) {
+                i++;
+                temp++;
+              }
+              nextStr += temp + str[i];
+            }
+            nextStr = nextStr == "" ? "1" : nextStr;
+            return getRe(current + 1, nextStr);
+          }
+        };
+        return getRe(0, "");
+      };
+    </script>
+
+    <script>
+      /*
+      39. Combination Sum
+
+      Example:
+
+        Input: candidates = [2,3,5], target = 8,
+        A solution set is:
+        [
+          [2,2,2,2],
+          [2,3,3],
+          [3,5]
+        ]
+      */
+
+      // 使用回溯
+      var combinationSum = function (candidates, target) {
+        let re = [];
+        let getRe = function (start, temp, count) {
+          if (count == target) {
+            re.push(Array.from(temp));
+          } else if (count < target) {
+            for (let i = start; i < candidates.length; i++) {
+              temp.push(candidates[i]);
+              getRe(i, temp, count + candidates[i]);
+              temp.pop();
+            }
+          }
+        };
+        getRe(0, [], 0);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      40. Combination Sum II
+
+      Example:
+
+        Input: candidates = [10,1,2,7,6,1,5], target = 8,
+        A solution set is:
+        [
+          [1, 7],
+          [1, 2, 5],
+          [2, 6],
+          [1, 1, 6]
+        ]
+      */
+
+      // 排序后使用回溯
+      var combinationSum2 = function (candidates, target) {
+        let re = [];
+        let getRe = function (start = 0, temp = [], count = target, obj = {}) {
+          if (count == 0) {
+            let str = temp.join("");
+            if (!obj[str]) {
+              obj[str] = 1;
+              re.push(Array.from(temp));
+            }
+          } else if (count > 0) {
+            for (let i = start; i < candidates.length; i++) {
+              if (candidates[i] <= count) {
+                temp.push(candidates[i]);
+                getRe(i + 1, temp, count - candidates[i], obj);
+                temp.pop();
+              }
+            }
+          }
+        };
+        candidates.sort();
+        getRe();
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      42. Trapping Rain Water
+      Example:
+
+        Input: [0,1,0,2,1,0,1,3,2,1,2,1]
+        Output: 6
+      */
+
+      // 获取最高点,循环左右
+      var trap = function (height) {
+        let re = 0;
+        let max = 0;
+        let maxIndex = 0;
+        for (let i = height.length - 1; i >= 0; i--) {
+          if (height[i] > max) {
+            max = height[i];
+            maxIndex = i;
+          }
+        }
+        let leftMax = 0;
+        for (let i = 0; i < maxIndex; i++) {
+          if (height[i] > leftMax) {
+            leftMax = height[i];
+          } else if (height[i] < leftMax) {
+            re += leftMax - height[i];
+          }
+        }
+        let rightMax = 0;
+        for (let i = height.length - 1; i > maxIndex; i--) {
+          if (height[i] > rightMax) {
+            rightMax = height[i];
+          } else if (rightMax > height[i]) {
+            re += rightMax - height[i];
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      43. Multiply Strings
+
+      Example:
+
+        Input: num1 = "123", num2 = "456"
+        Output: "56088"
+      */
+
+      var multiply = function (num1, num2) {
+        var arr = [];
+        for (var i = num2.length - 1; i >= 0; i--) {
+          var temp = cen(num1, num2[i]);
+          var j = i;
+          while (j++ < num2.length - 1) {
+            temp += "0";
+          }
+          arr.push(temp);
+        }
+        return arrAdd(...arr);
+      };
+
+      var cen = function (str, s) {
+        var re = "",
+          last = 0;
+        for (var i = str.length - 1; i >= 0; i--) {
+          var temp = s * str[i] + last;
+          if (temp > 9) {
+            last = (temp / 10) | 0;
+            temp %= last * 10;
+          } else {
+            last = 0;
+          }
+          re = temp + re;
+        }
+        if (last > 0) {
+          re = last + re;
+        }
+        return re;
+      };
+
+      var add = function (num1, num2) {
+        var re = "",
+          len1 = num1.length - 1,
+          len2 = num2.length - 1,
+          last = 0,
+          temp = 0;
+        while (len1 >= 0 || len2 >= 0) {
+          temp = 0;
+          if (len1 >= 0) {
+            temp += Number(num1[len1--]);
+          }
+          if (len2 >= 0) {
+            temp += Number(num2[len2--]);
+          }
+          temp += last;
+          if (temp > 9) {
+            temp %= 10;
+            last = 1;
+          } else {
+            last = 0;
+          }
+          re = temp + re;
+        }
+        if (last > 0) {
+          re = last + re;
+        }
+        return re;
+      };
+
+      var arrAdd = function (...numArr) {
+        if (numArr.lengh == 0) {
+          return 0;
+        } else if (numArr.length == 1) {
+          return numArr[0];
+        } else if (numArr.length == 2) {
+          return add(numArr[0], numArr[1]);
+        } else {
+          var temp = add(numArr.pop(), numArr.pop());
+          return add(temp, arrAdd(...numArr));
+        }
+      };
+
+      /*
+          8 9  <- num2
+          7 6  <- num1
+      -------
+          5 4
+        4 8
+        6 3
+      5 6
+      -------
+      6 7 6 4
+      */
+
+      // 两个字符串相乘的最大长度不会大于两个字符串长度的总长
+      var multiply = function (num1, num2) {
+        if (num1 === "0" || num2 === "0") {
+          return "0";
+        }
+        const re = Array(num1.length + num2.length).fill(0);
+        for (let i = num1.length - 1; i >= 0; i--) {
+          for (let j = num2.length - 1; j >= 0; j--) {
+            let index = i + j + 1;
+            let current = num1[i] * num2[j] + re[index];
+            if (current >= 10) {
+              // 十位项
+              re[index - 1] += (current / 10) | 0;
+              // 个位项
+              re[index] = current % 10;
+            } else {
+              re[index] = current;
+            }
+          }
+        }
+        let flag = true;
+        let res = '';
+        for (let i = 0; i < re.length; i++) {
+          if (re[i] != '0') {
+            flag = false;
+            res += re[i];
+          } else if (re[i] == '0' && !flag) {
+            res += re[i];
+          }
+        }
+        return res
+      };
+    </script>
+
+    <script>
+      /*
+      44. Wildcard Matching
+      '?' Matches any single character.
+      '*' Matches any sequence of characters (including the empty sequence).
+      Example:
+
+        Input:
+        s = "adceb"
+        p = "*a*b"
+        Output: true
+        Explanation: The first '*' matches the empty sequence, while the second '*' matches the substring "dce".
+      */
+
+      var isMatch = function (s, p) {
+        if (s == p) {
+          return true;
+        }
+        p = p.replace(/(\*)+/g, "$1");
+        let getRe = function (si = 0, pi = 0, obj = {}) {
+          if (si == s.length) {
+            if (pi == p.length) {
+              return true;
+            } else {
+              for (let i = pi; i < p.length; i++) {
+                if (p[i] != "*") {
+                  return false;
+                }
+              }
+              return true;
+            }
+          } else if (pi == p.length) {
+            return false;
+          } else {
+            if (s[si] == p[pi] || p[pi] == "?") {
+              let key = si + 1 + ":" + (pi + 1);
+              if (!(key in obj)) {
+                obj[key] = getRe(si + 1, pi + 1, obj);
+              }
+              return obj[key];
+            } else if (p[pi] == "*") {
+              let key1 = si + 1 + ":" + (pi + 1);
+              let key2 = si + ":" + (pi + 1);
+              let key3 = si + 1 + ":" + pi;
+              if (!(key1 in obj)) {
+                obj[key1] = getRe(si + 1, pi + 1, obj);
+              }
+              if (!(key2 in obj)) {
+                obj[key2] = getRe(si, pi + 1, obj);
+              }
+              if (!(key3 in obj)) {
+                obj[key3] = getRe(si + 1, pi, obj);
+              }
+              return obj[key1] || obj[key2] || obj[key3];
+            } else {
+              return false;
+            }
+          }
+        };
+        return getRe();
+      };
+    </script>
+
+    <script>
+      /*
+      45. Jump Game II
+      Example:
+
+        Input: [2,3,1,1,4]
+        Output: 2
+        Explanation: The minimum number of jumps to reach the last index is 2.
+            Jump 1 step from index 0 to 1, then 3 steps to the last index.
+        这题是之前那道 Jump Game 的延伸，那题是问能不能到达最后一个数字，而此题只让求到达最后一个位置的最少跳跃数，貌似是默认一定能到达最后位置的? 此题的核心方法是利用贪婪算法 Greedy 的思想来解，想想为什么呢？ 为了较快的跳到末尾，想知道每一步能跳的范围，这里贪婪并不是要在能跳的范围中选跳力最远的那个位置，因为这样选下来不一定是最优解，这么一说感觉又有点不像贪婪算法了。其实这里贪的是一个能到达的最远范围，遍历当前跳跃能到的所有位置，然后根据该位置上的跳力来预测下一步能跳到的最远距离，贪出一个最远的范围，一旦当这个范围到达末尾时，当前所用的步数一定是最小步数。需要两个变量 cur 和 pre 分别来保存当前的能到达的最远位置和之前能到达的最远位置，只要 cur 未达到最后一个位置则循环继续，pre 先赋值为 cur 的值，表示上一次循环后能到达的最远位置，如果当前位置i小于等于 pre，说明还是在上一跳能到达的范围内，根据当前位置加跳力来更新 cur，更新 cur 的方法是比较当前的 cur 和 i + A[i] 之中的较大值，如果题目中未说明是否能到达末尾，还可以判断此时 pre 和 cur 是否相等，如果相等说明 cur 没有更新，即无法到达末尾位置
+      */
+
+      // 贪心算法
+      var jump = function (nums) {
+        if (nums.length == 1) {
+          return 0;
+        } else {
+          if (nums.length < 2) return 0;
+          let maxPos = nums[0],
+            maxSteps = nums[0];
+          let jumps = 1;
+          for (let i = 0; i < nums.length; i++) {
+            if (maxSteps < i) {
+              jumps++;
+              maxSteps = maxPos;
+            }
+            // 当前贪心范围内能够达到的最远距离
+            maxPos = Math.max(maxPos, nums[i] + i);
+          }
+          return jumps;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      46. Permutations
+
+      Example:
+
+        Input: [1,2,3]
+        Output:
+        [
+          [1,2,3],
+          [1,3,2],
+          [2,1,3],
+          [2,3,1],
+          [3,1,2],
+          [3,2,1]
+        ]
+      */
+
+      var permute = function (nums) {
+        var re = [],
+          obj = {
+            length: 0,
+          };
+        tempFun(nums, obj, re, []);
+        return re;
+      };
+
+      var tempFun = function (nums, obj, reArr, reTemp) {
+        if (nums.length - obj.length > 0) {
+          if (nums.length - obj.length == 1) {
+            reArr.push(nums);
+          }
+          if (nums.length - obj.length == 2) {
+            var re = Array.from(reTemp);
+            for (var i = 0; i < nums.length; i++) {
+              if (!(i in obj)) {
+                re.push(nums[i]);
+              }
+            }
+            var str = re.join("");
+            if (!(str in obj)) {
+              reArr.push(re);
+              obj[str] = 1;
+            }
+            re = Array.from(reTemp);
+            for (var i = nums.length - 1; i >= 0; i--) {
+              if (!(i in obj)) {
+                re.push(nums[i]);
+              }
+            }
+            str = re.join("");
+            if (!(str in obj)) {
+              reArr.push(re);
+              obj[str] = 1;
+            }
+          } else {
+            for (var i = 0; i < nums.length; i++) {
+              if (!(i in obj)) {
+                obj[i] = 1;
+                obj.length += 1;
+                reTemp.push(nums[i]);
+                tempFun(nums, obj, reArr, reTemp);
+                obj.length -= 1;
+                reTemp.pop();
+                delete obj[i];
+              }
+            }
+          }
+        }
+      };
+
+      // 使用回溯
+      var permute = function (nums) {
+        let re = [];
+        let getRe = function (reTemp, temp) {
+          if (reTemp.length == nums.length) {
+            re.push(Array.from(reTemp));
+          } else if (reTemp.length < nums.length) {
+            for (let i = 0; i < nums.length; i++) {
+              if (!temp[i]) {
+                temp[i] = 1;
+                reTemp.push(nums[i]);
+                getRe(reTemp, temp);
+                reTemp.pop();
+                temp[i] = 0;
+              }
+            }
+          }
+        };
+        getRe([], Array(nums.length));
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      47. Permutations II
+
+      Example:
+
+        Input: [1,1,2]
+        Output:
+        [
+          [1,1,2],
+          [1,2,1],
+          [2,1,1]
+        ]
+      */
+
+      var permuteUnique = function (nums) {
+        let re = [];
+        let getRe = function (temp = [], index = Array(nums.length), obj = {}) {
+          if (temp.length == nums.length) {
+            let str = temp.join("");
+            if (!obj[str]) {
+              obj[str] = 1;
+              re.push(Array.from(temp));
+            }
+          } else if (temp.length < nums.length) {
+            for (let i = 0; i < nums.length; i++) {
+              if (!index[i]) {
+                index[i] = 1;
+                temp.push(nums[i]);
+                getRe(temp, index, obj);
+                temp.pop();
+                index[i] = 0;
+              }
+            }
+          }
+        };
+        getRe();
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      48. Rotate Image
+
+      Example:
+
+        Given input matrix = 
+        [
+          [1,2,3],
+          [4,5,6],
+          [7,8,9]
+        ],
+
+        rotate the input matrix in-place such that it becomes:
+        [
+          [7,4,1],
+          [8,5,2],
+          [9,6,3]
+        ]
+      */
+      var rotate = function (matrix) {};
+    </script>
+
+    <script>
+      /*
+      49. Group Anagrams
+      Example:
+
+      Input: ["eat", "tea", "tan", "ate", "nat", "bat"],
+      Output:
+      [
+        ["ate","eat","tea"],
+        ["nat","tan"],
+        ["bat"]
+      ]
+      */
+
+      var groupAnagrams = function (strs) {
+        let sTemp = [];
+        for (let i = 0; i < strs.length; i++) {
+          sTemp[i] = strs[i].split("").sort().join("");
+        }
+        let arr = Array(strs.length);
+        let re = [];
+        for (let i = 0; i < strs.length; i++) {
+          if (!arr[i]) {
+            arr[i] = 1;
+            let tArr = [strs[i]];
+            let target = sTemp[i];
+            for (let j = i + 1; j < strs.length; j++) {
+              if (!arr[j] && target == sTemp[j]) {
+                arr[j] = 1;
+                tArr.push(strs[j]);
+              }
+            }
+            re.push(tArr);
+          }
+        }
+        return re;
+      };
+
+      var groupAnagrams = function (strs) {
+        var re = [];
+        groupTemp(strs, re, 0);
+        return re;
+      };
+
+      var groupTemp = function (strs, reArr, index) {
+        if (index < strs.length) {
+          if (index === 0) {
+            reArr.push(Array(strs[index]));
+          } else {
+            var target = strs[index],
+              flag = true;
+            for (var i = 0; i < reArr.length; i++) {
+              if (
+                target.length === reArr[i][0].length &&
+                judgeStrByObj(target, strToObj(reArr[i][0]))
+              ) {
+                flag = false;
+                reArr[i].push(target);
+                break;
+              }
+            }
+            if (flag) {
+              reArr.push(Array(strs[index]));
+            }
+          }
+          groupTemp(strs, reArr, index + 1);
+        }
+      };
+
+      var judgeStrByObj = function (str, obj) {
+        for (var i = 0; i < str.length; i++) {
+          if (!(str[i] in obj) || obj[str[i]] === 0) {
+            return false;
+          }
+          obj[str[i]] = --obj[str[i]];
+        }
+        return true;
+      };
+
+      var strToObj = function (str) {
+        var obj = {};
+        for (var i = 0; i < str.length; i++) {
+          if (str[i] in obj) {
+            obj[str[i]] = ++obj[str[i]];
+          } else {
+            obj[str[i]] = 1;
+          }
+        }
+        return obj;
+      };
+    </script>
+
+    <script>
+      /*
+      50. Pow(x, n)
+      Example:
+
+        Input: 2.10000, 3
+        Output: 9.26100
+      */
+
+      var myPow = function (x, n) {
+        var count = 1,
+          all = Math.abs(n),
+          temp = x,
+          sum = 1;
+        while (all) {
+          if (count * 2 <= all) {
+            temp *= temp;
+            count *= 2;
+          } else {
+            sum *= temp;
+            all -= count;
+            temp = x;
+            count = 1;
+          }
+        }
+        sum = n > 0 ? sum : 1 / sum;
+        return sum;
+      };
+    </script>
+
+    <script>
+      /*
+      51. N-Queens
+      Example:
+
+        Input: 4
+        Output: [
+        [".Q..",  // Solution 1
+          "...Q",
+          "Q...",
+          "..Q."],
+
+        ["..Q.",  // Solution 2
+          "Q...",
+          "...Q",
+          ".Q.."]
+        ]
+      */
+
+      var solveNQueens = function (n) {
+        let arr = Array(n);
+        let judgeArr = function (row, col) {
+          for (let i = 0; i < row; i++) {
+            if (
+              arr[i] === col ||
+              Math.abs(row - i) === Math.abs(arr[i] - col)
+            ) {
+              return false;
+            }
+          }
+          return true;
+        };
+        let getLen = function (t) {
+          let re = "";
+          for (let i = 0; i < n; i++) {
+            if (t == i) {
+              re += "Q";
+            } else {
+              re += ".";
+            }
+          }
+          return re;
+        };
+        let re = [];
+        let getRe = function (index = 0, temp = []) {
+          if (index == n) {
+            re.push(Array.from(temp));
+          } else if (index < n) {
+            for (let i = 0; i < n; i++) {
+              if (judgeArr(index, i)) {
+                arr[index] = i;
+                temp.push(getLen(i));
+                getRe(index + 1, temp);
+                temp.pop();
+                arr[index] = null;
+              }
+            }
+          }
+        };
+        getRe();
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      52. N-Queens II
+
+      Example:
+
+        Input: 4
+        Output: 2
+        Explanation: There are two distinct solutions to the 4-queens puzzle as shown below.
+        [
+        [".Q..",  // Solution 1
+          "...Q",
+          "Q...",
+          "..Q."],
+
+        ["..Q.",  // Solution 2
+          "Q...",
+          "...Q",
+          ".Q.."]
+        ]
+      */
+
+      var totalNQueens = function (n) {
+        let arr = Array(n);
+
+        function judge(row, col) {
+          for (let i = 0; i < row; i++) {
+            if (arr[i] == col || Math.abs(row - i) == Math.abs(col - arr[i])) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        let count = 0;
+
+        let getRe = function (row) {
+          if (row == n) {
+            count++;
+          } else if (row < n) {
+            for (let i = 0; i < n; i++) {
+              if (judge(row, i)) {
+                arr[row] = i;
+                getRe(row + 1);
+              }
+            }
+          }
+        };
+
+        getRe(0);
+
+        return count;
+      };
+    </script>
+
+    <script>
+      /*
+      53. Maximum Subarray
+      Example:
+
+        Input: [-2,1,-3,4,-1,2,1,-5,4],
+        Output: 6
+        Explanation: [4,-1,2,1] has the largest sum = 6.
+      */
+
+      var maxSubArray = function (nums) {
+        var sum = 0,
+          max = -Infinity;
+        for (var i = 0; i < nums.length; i++) {
+          if (sum >= 0) {
+            sum += nums[i];
+          } else {
+            sum = nums[i];
+          }
+          max = max > sum ? max : sum;
+        }
+        return max;
+      };
+    </script>
+
+    <script>
+      /*
+      55. Jump Game
+      Example:
+
+        Input: [2,3,1,1,4]
+        Output: true
+        Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+      */
+      //  使用递归
+      var canJump = function (nums) {
+        if (nums.length == 1) {
+          return true;
+        }
+        var obj = {
+          length: nums.length - 1,
+        };
+        return jumpFun(obj, nums, nums.length - 2);
+      };
+
+      var jumpFun = function (obj, nums, index) {
+        if (index == 0) {
+          if (nums[index] >= obj.length) {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          if (index + nums[index] >= obj.length) {
+            obj.length = index;
+          }
+          return jumpFun(obj, nums, index - 1);
+        }
+      };
+
+      // 使用动态规划
+      var canJump = function (nums) {
+        /*
+        初始条件:青蛙在第一个位置上
+        能跳到n位置上的条件是:存在一个可以跳到的位置m,并且nums[m] + m >= n
+        */
+        var arr = Array(nums.length);
+        arr[0] = true;
+        for (var i = 1; i < arr.length; i++) {
+          arr[i] = false;
+          for (var j = i - 1; j >= 0; j--) {
+            if (arr[j] && nums[j] + j >= i) {
+              arr[i] = true;
+              break;
+            }
+          }
+        }
+        return arr[arr.length - 1];
+      };
+    </script>
+
+    <script>
+      /*
+      56. Merge Intervals
+      Example:
+
+        Input: [[1,3],[2,6],[8,10],[15,18]]
+        Output: [[1,6],[8,10],[15,18]]
+        Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
+      */
+
+      var merge = function (intervals) {
+        intervals.sort((o1, o2) => o1[0] - o2[0]);
+        let re = [intervals[0]];
+        for (let i = 1; i < intervals.length; i++) {
+          if (intervals[i][0] <= re[re.length - 1][1]) {
+            re[re.length - 1][1] =
+              re[re.length - 1][1] > intervals[i][1]
+                ? re[re.length - 1][1]
+                : intervals[i][1];
+          } else {
+            re.push(intervals[i]);
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      57. Insert Interval
+      Example 2:
+
+        Input: intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]
+        Output: [[1,2],[3,10],[12,16]]
+        Explanation: Because the new interval [4,8] overlaps with [3,5],[6,7],[8,10].
+      */
+      var insert = function (intervals, newInterval) {
+        intervals.push(newInterval);
+        return merge(intervals);
+      };
+    </script>
+
+    <script>
+      /*
+      58. Length of Last Word
+      Example:
+
+        Input: "Hello World"
+        Output: 5
+      */
+      var lengthOfLastWord = function (s) {
+        var arr = s.trim().split(" ");
+        return arr[arr.length - 1].length;
+      };
+    </script>
+
+    <script>
+      /*
+      60. Permutation Sequence
+      Example:
+
+        Input: n = 4, k = 9
+        Output: "2314"
+      */
+      var getPermutation = function (n, k) {
+        let arr = Array(n + 1);
+        arr[1] = 1;
+        for (let i = 2; i <= n; i++) {
+          arr[i] = arr[i - 1] * i;
+        }
+        let re = "";
+        if (k == 1 || k <= arr[n - 1]) {
+          var count = 0;
+          var str = "";
+          var flag = true;
+          arr = Array(n);
+        } else {
+          let temp = k / arr[n - 1];
+          var count = (Math.ceil(temp) - 1) * arr[n - 1];
+          var str = Math.ceil(temp) + "";
+          var flag = true;
+          arr = Array(n);
+          arr[Math.ceil(temp) - 1] = 1;
+        }
+        let getRe = function (str) {
+          if (str.length == n) {
+            count++;
+            if (count == k) {
+              re = str;
+              flag = false;
+            }
+          } else if (str.length < n && flag) {
+            for (let i = 0; i < n; i++) {
+              if (!arr[i]) {
+                arr[i] = 1;
+                getRe(str + (i + 1));
+                arr[i] = 0;
+              }
+            }
+          }
+        };
+        getRe(str);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      61. Rotate List
+      Example:
+
+        Input: 0->1->2->NULL, k = 4
+        Output: 2->0->1->NULL
+        Explanation:
+        rotate 1 steps to the right: 2->0->1->NULL
+        rotate 2 steps to the right: 1->2->0->NULL
+        rotate 3 steps to the right: 0->1->2->NULL
+        rotate 4 steps to the right: 2->0->1->NULL
+      */
+      var rotateRight = function (head, k) {
+        let getLen = function (node) {
+          if (node) {
+            return 1 + getLen(node.next);
+          } else {
+            return 0;
+          }
+        };
+        let len = getLen(head);
+        if (len <= 1) {
+          return head;
+        }
+        k %= len;
+        let rotateList = function (head) {
+          if (k > 0) {
+            k--;
+            var headTemp = head;
+            var lastTemp = null;
+            while (head.next.next) {
+              head = head.next;
+            }
+            lastTemp = head.next;
+            head.next = null;
+            lastTemp.next = headTemp;
+            return rotateList(lastTemp);
+          } else {
+            return head;
+          }
+        };
+        return rotateList(head);
+      };
+    </script>
+
+    <script>
+      /*
+      62. Unique Paths
+      Example:
+
+        Input: m = 7, n = 3
+        Output: 28
+      使用数学的排列组合思想,横着走6步,竖着走2步,插空法排序
+      7 * 1 + 7 * 6 / 2 * 1 = 28
+      */
+      // 使用递归
+      var uniquePaths = function (m, n) {
+        let getRe = function (row, col, obj) {
+          if (row == m - 1 && j == n - 1) {
+            return 1;
+          } else if (row >= m || j >= n) {
+            return 0;
+          } else {
+            if (!(row + 1 + ":" + col in obj)) {
+              obj[row + 1 + ":" + col] = getRe(row + 1, col, obj);
+            }
+            if (!(row + ":" + (col + 1) in obj)) {
+              obj[row + ":" + (col + 1)] = getRe(row, col + 1, obj);
+            }
+            return obj[row + 1 + ":" + col] + obj[row + ":" + (col + 1)];
+          }
+        };
+        return getAll(0, 0, {});
+      };
+
+      // 使用动态规划
+      var uniquePaths = function (m, n) {
+        var arr = Array(n);
+        for (var i = 0; i < n; i++) {
+          for (var j = 0; j < m; j++) {
+            if (!arr[i]) {
+              arr[i] = Array(n);
+            }
+            if (i == 0 && j == 0) {
+              arr[i][j] = 1;
+            } else {
+              arr[i][j] =
+                (i - 1 >= 0 ? arr[i - 1][j] : 0) +
+                (j - 1 >= 0 ? arr[i][j - 1] : 0);
+            }
+          }
+        }
+        return arr[n - 1][m - 1];
+      };
+    </script>
+
+    <script>
+      /*
+      63. Unique Paths II
+      Example:
+
+        Input:
+        [
+          [0,0,0],
+          [0,1,0],
+          [0,0,0]
+        ]
+        Output: 2
+        Explanation:
+        There is one obstacle in the middle of the 3x3 grid above.
+        There are two ways to reach the bottom-right corner:
+        1. Right -> Right -> Down -> Down
+        2. Down -> Down -> Right -> Right
+      */
+      var uniquePathsWithObstacles = function (obstacleGrid) {
+        let m = obstacleGrid.length - 1;
+        let n = obstacleGrid[0].length - 1;
+        let getRe = function (row = 0, col = 0, obj = {}) {
+          if (row == m && col == n) {
+            return 1;
+          } else if (row > m || col > n || obstacleGrid[row][col] == 1) {
+            return 0;
+          } else {
+            if (!(row + 1 + ":" + col in obj)) {
+              obj[row + 1 + ":" + col] = getRe(row + 1, col, obj);
+            }
+            if (!(row + ":" + (col + 1) in obj)) {
+              obj[row + ":" + (col + 1)] = getRe(row, col + 1, obj);
+            }
+            return obj[row + 1 + ":" + col] + obj[row + ":" + (col + 1)];
+          }
+        };
+        return getRe();
+      };
+    </script>
+
+    <script>
+      /*
+      64. Minimum Path Sum
+      Example:
+
+        Input:
+        [
+          [1,3,1],
+          [1,5,1],
+          [4,2,1]
+        ]
+        Output: 7
+        Explanation: Because the path 1→3→1→1→1 minimizes the sum.
+      */
+      // 使用动态规划
+      var minPathSum = function (grid) {
+        let arr = Array(grid.length);
+        for (let i = 0; i < arr.length; i++) {
+          if (!arr[i]) {
+            arr[i] = Array(grid[0].length);
+          }
+          for (let j = 0; j < arr[i].length; j++) {
+            if (i == 0 && j == 0) {
+              arr[i][j] = grid[i][j];
+            } else {
+              arr[i][j] =
+                grid[i][j] +
+                Math.min(
+                  i - 1 >= 0 ? arr[i - 1][j] : Infinity,
+                  j - 1 >= 0 ? arr[i][j - 1] : Infinity
+                );
+            }
+          }
+        }
+        return arr[arr.length - 1][arr[0].length - 1];
+      };
+    </script>
+
+    <script>
+      /*
+      66. Plus One
+      Example:
+
+        Input: [1,2,3]
+        Output: [1,2,4]
+        Explanation: The array represents the integer 123.
+      */
+      var plusOne = function (digits) {
+        var len = digits.length - 1,
+          last = 1;
+        while (last != 0) {
+          var temp = digits[len] || 0;
+          temp += last;
+          if (temp > 9) {
+            temp = 0;
+            last = 1;
+          } else {
+            last = 0;
+          }
+          len >= 0 ? (digits[len--] = temp) : digits.unshift(temp);
+        }
+        return digits;
+      };
+    </script>
+
+    <script>
+      /*
+      67. Add Binary
+      Example:
+
+        Input: a = "1010", b = "1011"
+        Output: "10101"
+      */
+      var addBinary = function (a, b) {
+        var re = "",
+          i = a.length - 1,
+          j = b.length - 1,
+          last = 0;
+        while (i >= 0 || j >= 0 || last != 0) {
+          var temp = 0;
+          temp += Number(a[i--]) || 0;
+          temp += Number(b[j--]) || 0;
+          temp += last;
+          if (temp > 1) {
+            temp %= 2;
+            last = 1;
+          } else {
+            last = 0;
+          }
+          re = temp + re;
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      69. Sqrt(x)
+      Example:
+
+        Input: 8
+        Output: 2
+        Explanation: The square root of 8 is 2.82842..., and since 
+                    the decimal part is truncated, 2 is returned.
+      */
+
+      // 1. 使用递归
+      var mySqrt = function (x) {
+        var getRe = function (count, i) {
+          var temp = (i + 1) * (i + 1);
+          if (count <= x && temp > x) {
+            return i;
+          } else {
+            return getRe(temp, i + 1);
+          }
+        };
+        return getRe(0, 0);
+      };
+
+      // 2. 使用二分逼近
+      var mySqrt = function (x) {
+        let getRe = function (start, end) {
+          let m = ((start + end) / 2) | 0;
+          let temp = m * m;
+          if (temp == x) {
+            return m;
+          } else if (temp > x) {
+            if ((m - 1) * (m - 1) <= x) {
+              return m - 1;
+            } else {
+              return getRe(start, m - 1);
+            }
+          } else {
+            if ((m + 1) * (m + 1) > x) {
+              return m;
+            } else {
+              return getRe(m + 1, end);
+            }
+          }
+        };
+        return getRe(0, x);
+      };
+    </script>
+
+    <script>
+      /*
+      70. Climbing Stairs
+      Example:
+
+        Input: 3
+        Output: 3
+        Explanation: There are three ways to climb to the top.
+        1. 1 step + 1 step + 1 step
+        2. 1 step + 2 steps
+        3. 2 steps + 1 step
+      */
+      // 使用动态规划
+      var climbStairs = function (n) {
+        let arr = Array(n + 1);
+        arr[0] = 1;
+        for (let i = 1; i <= n; i++) {
+          arr[i] = (i - 2 >= 0 ? arr[i - 2] : 0) + arr[i - 1];
+        }
+        return arr[n];
+      };
+
+      // 使用递归
+      var climbStairs = function (n) {
+        var toTop = function (target, obj1, obj2) {
+          if (target == n) {
+            return 1;
+          } else if (target < n) {
+            var temp = 0;
+            if (!(target + 1 in obj1)) {
+              obj1[target + 1] = toTop(target + 1, obj1, obj2);
+            }
+            temp += obj1[target + 1];
+            if (target + 2 <= n) {
+              if (!(target + 2 in obj2)) {
+                obj2[target + 2] = toTop(target + 2, obj1, obj2);
+              }
+              temp += obj2[target + 2];
+            }
+            return temp;
+          }
+        };
+        return toTop(0, {}, {});
+      };
+    </script>
+
+    <script>
+      /*
+      71. Simplify Path
+      Example:
+
+        Input: "/a//b////c/d//././/.."
+        Output: "/a/b/c"
+      */
+      // 使用栈
+      var simplifyPath = function (path) {
+        var sPath = path.split(/\/+/);
+        var re = ["/"];
+        for (var i = 0; i < sPath.length; i++) {
+          if (sPath[i] == "..") {
+            if (re.length >= 2) {
+              re.pop();
+            }
+          } else if (sPath[i] != "" && sPath[i] != ".") {
+            if (re.length > 1) {
+              re.push("/" + sPath[i]);
+            } else {
+              re.push(sPath[i]);
+            }
+          }
+        }
+        return re.join("");
+      };
+    </script>
+
+    <script>
+      /*
+      72. Edit Distance
+      Example:
+
+        Input: word1 = "intention", word2 = "execution"
+        Output: 5
+        Explanation: 
+        intention -> inention (remove 't')
+        inention -> enention (replace 'i' with 'e')
+        enention -> exention (replace 'n' with 'x')
+        exention -> exection (replace 'n' with 'c')
+        exection -> execution (insert 'u')
+      */
+      var minDistance = function (word1, word2) {};
+    </script>
+
+    <script>
+      /*
+      73. Set Matrix Zeroes
+      Example:
+
+        Input: 
+        [
+          [0,1,2,0],
+          [3,4,5,2],
+          [1,3,1,5]
+        ]
+        Output: 
+        [
+          [0,0,0,0],
+          [0,4,5,0],
+          [0,3,1,0]
+        ]
+      */
+      var setZeroes = function (matrix) {
+        var row = {},
+          col = {};
+        for (var i = 0; i < matrix.length; i++) {
+          for (var j = 0; j < matrix[0].length; j++) {
+            if (matrix[i][j] === 0) {
+              row[i] = 1;
+              col[j] = 1;
+            }
+          }
+        }
+        for (var i = 0; i < matrix.length; i++) {
+          for (var j = 0; j < matrix[0].length; j++) {
+            if (i in row || j in col) {
+              matrix[i][j] = 0;
+            }
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      74. Search a 2D Matrix
+      Example:
+
+        Input:
+        matrix = [
+          [1,   3,  5,  7],
+          [10, 11, 16, 20],
+          [23, 30, 34, 50]
+        ]
+        target = 13
+        Output: false
+      */
+      var searchMatrix = function (matrix, target) {
+        var row = getRow(matrix, target);
+        if (row === false) {
+          return false;
+        }
+        var start = 0,
+          end = matrix[0].length - 1;
+        while (end >= start) {
+          var m = ((start + end) / 2) | 0;
+          if (matrix[row][m] == target) {
+            return true;
+          } else if (matrix[row][m] > target) {
+            end = m - 1;
+          } else {
+            start = m + 1;
+          }
+        }
+        return false;
+      };
+
+      var getRow = function (matrix, target) {
+        if (matrix.length == 0) {
+          return false;
+        }
+        var colLen = matrix[0].length - 1;
+        var row = 0;
+        if (matrix[row][colLen] >= target) {
+          return row;
+        }
+        while (row + 1 < matrix.length) {
+          if (
+            matrix[row][colLen] <= target &&
+            matrix[row + 1][colLen] >= target
+          ) {
+            return row + 1;
+          }
+          row++;
+        }
+        return false;
+      };
+
+      // 使用二分搜索
+      var searchMatrix = function (matrix, target) {
+        if (!matrix.length) {
+          return false;
+        } else {
+          let row = matrix.length;
+          let col = matrix[0].length;
+          for (let i = 0; i < row; i++) {
+            let start = 0;
+            let end = col - 1;
+            if (matrix[i][end] >= target) {
+              while (start <= end) {
+                let mid = ((start + end) / 2) | 0;
+                if (matrix[i][mid] == target) {
+                  return true;
+                } else if (matrix[i][mid] > target) {
+                  end = mid - 1;
+                } else {
+                  start = mid + 1;
+                }
+              }
+            }
+          }
+          return false;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      75. Sort Colors
+      Example:
+
+        Input: [2,0,2,1,1,0]
+        Output: [0,0,1,1,2,2]
+      */
+      var sortColors = function (nums) {
+        let point = 0,
+          last = 0;
+        while (point < nums.length) {
+          for (let tempP = point; tempP < nums.length; tempP++) {
+            if (nums[tempP] == last) {
+              if (tempP != point) {
+                let temp = nums[tempP];
+                nums[tempP] = nums[point];
+                nums[point] = temp;
+              }
+              point++;
+            }
+          }
+          last++;
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      76. Minimum Window Substring
+      Example:
+
+        Input: S = "ADOBECODEBANC", T = "ABC"
+        Output: "BANC"
+      */
+
+      // 使用滑动窗口
+      var minWindow = function (s, t) {
+        let re = "";
+        let obj = {};
+        for (let i = 0; i < t.length; i++) {
+          if (t[i] in obj) {
+            obj[t[i]]++;
+          } else {
+            obj[t[i]] = 1;
+          }
+        }
+
+        let temp = {};
+
+        function judge() {
+          for (let key in obj) {
+            if (!(key in temp)) {
+              return false;
+            }
+            if (temp[key] < obj[key]) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        let left = 0;
+        let right = 0;
+        while (right < s.length) {
+          if (s[right] in temp) {
+            temp[s[right]]++;
+          } else {
+            temp[s[right]] = 1;
+          }
+          right++;
+          while (right - left >= t.length && judge()) {
+            if (re == "") {
+              re = s.slice(left, right);
+            } else if (re.length > right - left) {
+              re = s.slice(left, right);
+            }
+            temp[s[left]]--;
+            left++;
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      77. Combinations
+      Example:
+
+        Input: n = 4, k = 2
+        Output:
+        [
+          [2,4],
+          [3,4],
+          [2,3],
+          [1,2],
+          [1,3],
+          [1,4],
+        ]
+      */
+      // 回溯
+      var combine = function (n, k) {
+        let re = [];
+        let getRe = function (index, tempArr) {
+          if (tempArr.length == k) {
+            re.push(Array.from(tempArr));
+          } else {
+            for (var i = index; i < n; i++) {
+              tempArr.push(i + 1);
+              getRe(i + 1, tempArr);
+              tempArr.pop();
+            }
+          }
+        };
+        getRe(0, []);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      78. Subsets
+      Example:
+
+        Input: nums = [1,2,3]
+        Output:
+        [
+          [3],
+          [1],
+          [2],
+          [1,2,3],
+          [1,3],
+          [2,3],
+          [1,2],
+          []
+        ]
+      */
+
+      // 回溯
+      var subsets = function (nums) {
+        let re = [];
+        let getRe = function (current, reTemp) {
+          if (current <= nums.length) {
+            re.push(Array.from(reTemp));
+            for (var i = current; i < nums.length; i++) {
+              reTemp.push(nums[i]);
+              getRe(i + 1, reTemp);
+              reTemp.pop();
+            }
+          }
+        };
+        getRe(0, []);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      79. Word Search
+      Example:
+
+        board =
+        [
+          ['A','B','C','E'],
+          ['S','F','C','S'],
+          ['A','D','E','E']
+        ]
+
+        Given word = "ABCCED", return true.
+        Given word = "SEE", return true.
+        Given word = "ABCB", return false.
+      */
+
+      var exist = function (board, word) {
+        let getRe = function (index, row, col, obj) {
+          if (
+            row < 0 ||
+            col < 0 ||
+            row >= board.length ||
+            col >= board[0].length
+          ) {
+            return false;
+          } else if (index < word.length) {
+            if (board[row][col] != word[index]) {
+              return false;
+            } else {
+              obj[row + ":" + col] = 1;
+              if (index == word.length - 1) {
+                return true;
+              }
+              let re = false;
+              if (!obj[row - 1 + ":" + col]) {
+                re = re || getRe(index + 1, row - 1, col, obj);
+                obj[row - 1 + ":" + col] = 0;
+              }
+              if (!obj[row + 1 + ":" + col]) {
+                re = re || getRe(index + 1, row + 1, col, obj);
+                obj[row + 1 + ":" + col] = 0;
+              }
+              if (!obj[row + ":" + (col + 1)]) {
+                re = re || getRe(index + 1, row, col + 1, obj);
+                obj[row + ":" + (col + 1)] = 0;
+              }
+              if (!obj[row + ":" + (col - 1)]) {
+                re = re || getRe(index + 1, row, col - 1, obj);
+                obj[row + ":" + (col - 1)] = 0;
+              }
+              return re;
+            }
+          }
+        };
+        let re = false;
+        for (let i = 0; i < board.length; i++) {
+          for (let j = 0; j < board[0].length; j++) {
+            if (board[i][j] == word[0]) {
+              re = re || getRe(0, i, j, {});
+            }
+          }
+        }
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      80. Remove Duplicates from Sorted Array II
+      Example:
+
+        Given nums = [0,0,1,1,1,1,2,3,3],
+
+        Your function should return length = 7, with the first seven elements of nums being modified to 0, 0, 1, 1, 2, 3 and 3 respectively.
+
+        It doesn't matter what values are set beyond the returned length.
+      */
+
+      var removeDuplicates = function (nums) {
+        function swap(i, j) {
+          let temp = nums[i];
+          nums[i] = nums[j];
+          nums[j] = temp;
+        }
+
+        if (nums.length < 3) {
+          return 2;
+        } else {
+          let len = 2;
+          let start = 2;
+          for (let i = 2; i < nums.length; i++) {
+            if (
+              nums[i] == nums[start - 1] &&
+              nums[start - 1] == nums[start - 2]
+            ) {
+              continue;
+            } else {
+              swap(i, start);
+              len++;
+              start++;
+            }
+          }
+          return len;
+        }
+      };
+
+      var removeDuplicates = function (nums) {
+        var start = 0,
+          len = nums.length;
+        for (var current = start + 1; current < len; current++) {
+          var temp = 1;
+          while (current < len && nums[start] == nums[current]) {
+            temp++;
+            current++;
+            if (temp > 2) {
+              current--;
+              temp = 2;
+              for (var i = current; i < len - 1; i++) {
+                nums[i] = nums[i + 1];
+              }
+              len--;
+            }
+          }
+          start = current;
+        }
+        return len;
+      };
+    </script>
+
+    <script>
+      /*
+      81. Search in Rotated Sorted Array II
+      Example:
+
+        Input: nums = [2,5,6,0,0,1,2], target = 3
+        Output: false
+      */
+      var search = function (nums, target) {};
+    </script>
+
+    <script>
+      /*
+      82. Remove Duplicates from Sorted List II
+      Example:
+      
+        Input: 1->2->3->3->4->4->5
+        Output: 1->2->5
+      */
+
+      // 使用递归
+      var deleteDuplicates = function (head) {
+        let getRe = function (node) {
+          if (node) {
+            let t = node.next;
+            if (t && t.val == node.val) {
+              t = t.next;
+              while (t && t.val == node.val) {
+                t = t.next;
+              }
+              return getRe(t);
+            } else {
+              node.next = getRe(t);
+              return node;
+            }
+          } else {
+            return null;
+          }
+        };
+        return getRe(head);
+      };
+
+      var deleteDuplicates = function (head) {
+        var temp = new ListNode(-1);
+        var t1 = head,
+          t2 = head.next,
+          headTemp = temp;
+        while (t1 || t2) {
+          if (!t2) {
+            temp.next = t1;
+            t1 = null;
+          } else {
+            if (t1.val == t2.val) {
+              while (t2 && t1.val == t2.val) {
+                t2 = t2.next;
+              }
+              t1 = t2;
+              t2 = t1 ? t1.next : null;
+            } else {
+              temp.next = t1;
+              temp = t1;
+              t1 = t2;
+              t2 = t1.next;
+              temp.next = null;
+            }
+          }
+        }
+        return headTemp.next;
+      };
+    </script>
+
+    <script>
+      /*
+      83. Remove Duplicates from Sorted List
+      Example:
+
+        Input: 1->1->2->3->3
+        Output: 1->2->3
+      */
+      // 使用递归
+      var deleteDuplicates = function (head) {
+        let getRe = function (node) {
+          if (node) {
+            let next = node.next;
+            while (next && next.val == node.val) {
+              next = next.next;
+            }
+            node.next = getRe(next);
+            return node;
+          } else {
+            return node;
+          }
+        };
+        return getRe(head);
+      };
+
+      var deleteDuplicates = function (head) {
+        var temp = new ListNode(-Infinity);
+        var headTemp = temp;
+        var t1 = head;
+        while (t1) {
+          if (t1.val != temp.val) {
+            temp.next = t1;
+            temp = t1;
+            temp.next = null;
+          }
+          t1 = t1.next;
+        }
+        return headTemp.next;
+      };
+    </script>
+
+    <script>
+      /*
+      86. Partition List
+      Example:
+
+        Input: head = 1->4->3->2->5->2, x = 3
+        Output: 1->2->2->4->3->5
+      */
+
+      var partition = function (head, x) {
+        var smallLi = new ListNode(-1);
+        var headTemp = smallLi,
+          bigHead = null,
+          bigLi = null;
+        while (head) {
+          if (head.val < x) {
+            smallLi.next = head;
+            smallLi = head;
+          } else {
+            if (!bigLi) {
+              bigLi = head;
+              bigHead = bigLi;
+            } else {
+              bigLi.next = head;
+              bigLi = head;
+            }
+          }
+          head = head.next;
+        }
+        if (bigLi) {
+          bigLi.next = null;
+        }
+        smallLi.next = bigHead;
+        return headTemp.next;
+      };
+    </script>
+
+    <script>
+      /*
+      88. Merge Sorted Array
+      Example:
+
+        Input:
+        nums1 = [1,2,3,0,0,0], m = 3
+        nums2 = [2,5,6],       n = 3
+
+        Output: [1,2,2,3,5,6]
+      */
+      var merge = function (nums1, m, nums2, n) {
+        var move = function (arr, start, end) {
+          for (var i = end; i > start; i--) {
+            arr[i] = arr[i - 1];
+          }
+        };
+        var i = 0,
+          j = 0;
+        while (j < n) {
+          if (i >= m) {
+            nums1[i] = nums2[j];
+            j++;
+          } else {
+            if (nums1[i] > nums2[j]) {
+              move(nums1, i, m);
+              nums1[i] = nums2[j];
+              m++;
+              j++;
+            }
+          }
+          i++;
+        }
+        return nums1;
+      };
+    </script>
+
+    <script>
+      /*
+      89. Gray Code
+      Example:
+
+        Input: 2
+        Output: [0,1,3,2]
+        Explanation:
+        00 - 0
+        01 - 1
+        11 - 3
+        10 - 2
+
+        For a given n, a gray code sequence may not be uniquely defined.
+        For example, [0,2,3,1] is also a valid gray code sequence.
+
+        00 - 0
+        10 - 2
+        11 - 3
+        01 - 1
+      */
+      // 使用规律
+      var grayCode = function (n) {
+        let arr = [0];
+        for (let i = 0; i < n; i++) {
+          let len = arr.length - 1;
+          for (let j = len; j >= 0; j--) {
+            arr.push(arr[j] + Math.pow(2, i));
+          }
+        }
+        return arr;
+      };
+
+      var grayCode = function (n) {
+        var len = Math.pow(2, n);
+        var re = null;
+        var getRe = function (count, arr, temp, obj) {
+          if (count >= len) {
+            re = Array.from(temp);
+            return true;
+          } else {
+            var flag = false;
+            for (var i = 0; i < arr.length; i++) {
+              if (arr[i] === 0) {
+                arr[i] = 1;
+                var num = Number("0b" + arr.join(""));
+                if (!obj[num]) {
+                  obj[num] = 1;
+                  temp.push(num);
+                  flag = flag || getRe(count + 1, arr, temp, obj);
+                  temp.pop();
+                  obj[num] = 0;
+                }
+                arr[i] = 0;
+              } else {
+                arr[i] = 0;
+                var num = Number("0b" + arr.join(""));
+                if (!obj[num]) {
+                  obj[num] = 1;
+                  temp.push(num);
+                  flag = flag || getRe(count + 1, arr, temp, obj);
+                  temp.pop();
+                  obj[num] = 0;
+                }
+                arr[i] = 1;
+              }
+            }
+            return flag;
+          }
+        };
+        getRe(1, Array(n).fill(0), [0], {
+          0: 1,
+        });
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+  90. Subsets II
+  Example:
+
+    Input: [1,2,2]
+    Output:
+    [
+      [2],
+      [1],
+      [1,2,2],
+      [2,2],
+      [1,2],
+      []
+    ]
+  */
+      var subsetsWithDup = function (nums) {
+        let re = [];
+        nums.sort((o1, o2) => o1 - o2);
+        let getRe = function (arr, start, obj) {
+          if (start <= nums.length) {
+            let temp = arr.join("");
+            if (!(temp in obj)) {
+              obj[temp] = 1;
+              re.push(Array.from(arr));
+            }
+            for (let i = start; i < nums.length; i++) {
+              arr.push(nums[i]);
+              getRe(arr, i + 1, obj);
+              arr.pop();
+            }
+          }
+        };
+        getRe([], 0, {});
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+  91. Decode Ways
+  Example:
+
+    Input: "226"
+    Output: 3
+    Explanation: It could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+  */
+
+      // 使用动态规划
+      var numDecodings = function (s) {
+        if (s == "" || s[0] == 0) {
+          return 0;
+        } else {
+          let arr = Array(s.length);
+          arr[0] = 1;
+          for (let i = 1; i < s.length; i++) {
+            if (s[i] == 0) {
+              if (!arr[i - 1]) {
+                arr[i] = 0;
+              } else if (s[i - 1] == 1 || s[i - 1] == 2) {
+                arr[i] = i - 2 >= 0 ? arr[i - 2] : 1;
+              } else {
+                arr[i] = 0;
+              }
+            } else {
+              arr[i] = arr[i - 1];
+              if (s[i - 1] + s[i] <= 26 && s[i - 1] != 0) {
+                arr[i] += i - 2 >= 0 ? arr[i - 2] : 1;
+              }
+            }
+          }
+          return arr[s.length - 1];
+        }
+      };
+
+      // 使用递归
+      var numDecodings = function (s) {
+        let getRe = function (
+          start = 0,
+          arr = s.split(""),
+          current = 0,
+          obj = {}
+        ) {
+          if (start == arr.length) {
+            return 1;
+          } else if (start < arr.length) {
+            let re = 0;
+            if (arr[start] != 0) {
+              if (!(current + 1 + ":" + (start + 1) in obj)) {
+                obj[current + 1 + ":" + (start + 1)] = getRe(
+                  start + 1,
+                  arr,
+                  current + 1,
+                  obj
+                );
+              }
+              re += obj[current + 1 + ":" + (start + 1)];
+              if (
+                start + 1 < arr.length &&
+                Number(arr[start] + arr[start + 1]) < 27
+              ) {
+                if (!(current + 1 + ":" + (start + 2) in obj)) {
+                  obj[current + 1 + ":" + (start + 2)] = getRe(
+                    start + 2,
+                    arr,
+                    current + 1,
+                    obj
+                  );
+                }
+                re += obj[current + 1 + ":" + (start + 2)];
+              }
+            }
+            return re;
+          }
+        };
+        return getRe();
+      };
+    </script>
+
+    <script>
+      /*
+  92. Reverse Linked List II
+  Example:
+
+    Input: 1->2->3->4->5->NULL, m = 2, n = 4
+    Output: 1->4->3->2->5->NULL
+  */
+      // 使用递归
+      var reverseBetween = function (head, m, n) {
+        let getRe = function (node = head, len = 1) {
+          if (node) {
+            if (len != m) {
+              node.next = getRe(node.next, len + 1);
+              return node;
+            } else {
+              let arr = [];
+              while (len++ != n) {
+                arr.push(node);
+                node = node.next;
+              }
+              arr.push(node);
+              let next = node.next;
+              for (let i = arr.length - 1; i > 0; i--) {
+                arr[i].next = arr[i - 1];
+              }
+              arr[0].next = next;
+              return arr[arr.length - 1];
+            }
+          } else {
+            return null;
+          }
+        };
+        return getRe();
+      };
+
+      var reverseBetween = function (head, m, n) {
+        if (m === n) {
+          return head;
+        }
+        var headPre = null,
+          temp = head,
+          i = 0,
+          arr = [];
+        while (i < n + 1) {
+          i++;
+          if (i + 1 === m) {
+            headPre = temp;
+          }
+          if (i >= m) {
+            arr.push(temp);
+          }
+          temp = temp ? temp.next : null;
+        }
+        for (var i = arr.length - 2; i > 0; i--) {
+          arr[i].next = arr[i - 1];
+        }
+        arr[0].next = arr[arr.length - 1];
+        if (headPre) {
+          headPre.next = arr[arr.length - 2];
+          return head;
+        } else {
+          return arr[arr.length - 2];
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      93. Restore IP Addresses
+      Example:
+
+        Input: "25525511135"
+        Output: ["255.255.11.135", "255.255.111.35"]
+      */
+
+      // 回溯
+      var restoreIpAddresses = function (s) {
+        let re = [];
+        let getRe = function (temp = [], str = s) {
+          if (temp.length == 3) {
+            if (
+              str.length == 1 ||
+              (str.length > 1 && str[0] != "0" && Number(str) <= 255)
+            ) {
+              temp.push(str);
+              re.push(temp.join("."));
+              temp.pop();
+            }
+          } else if (temp.length < 3) {
+            for (let i = 1; i <= 3; i++) {
+              if (i < str.length) {
+                let t = str.substring(0, i);
+                if (
+                  t.length == 1 ||
+                  (t.length > 1 && t[0] != "0" && Number(t) <= 255)
+                ) {
+                  temp.push(t);
+                  getRe(temp, str.substring(i));
+                  temp.pop();
+                }
+              }
+            }
+          }
+        };
+        getRe();
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+      94. Binary Tree Inorder Traversal
+      Example:
+
+      Input: [1,null,2,3]
+        1
+          \
+          2
+          /
+        3
+
+      Output: [1,3,2]
+      二叉树的顺序遍历
+      */
+
+      var inorderTraversal = function (root) {
+        let re = [];
+        let stack = [];
+        while (true) {
+          if (root) {
+            stack.push(root);
+            root = root.left;
+          } else if (stack.length) {
+            root = stack.pop();
+            re.push(root.val);
+            root = root.right;
+          } else {
+            break;
+          }
+        }
+        return re;
+      };
+
+      // 使用递归
+      var inorderTraversal = function (root) {
+        let getRe = function (root, re) {
+          if (root) {
+            getRe(root.left, re);
+            re.push(root.val);
+            getRe(root.right, re);
+          }
+        };
+        let re = [];
+        getRe(root, re);
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
+  95. Unique Binary Search Trees II
+  Example:
+
+    Input: 3
+    Output:
+    [
+      [1,null,3,2],
+      [3,2,null,1],
+      [3,1,null,null,2],
+      [2,1,3],
+      [1,null,2,null,3]
+    ]
+    Explanation:
+    The above output corresponds to the 5 unique BST's shown below:
+
+      1         3     3      2      1
+       \       /     /      / \      \
+        3     2     1      1   3      2
+       /     /       \                 \
+      2     1         2                 3
+  */
+
+      // 使用动态规划
+      var generateTrees = function (n) {};
+    </script>
+
+    <script>
+      /*
+  96. Unique Binary Search Trees
+  Example:
+
+    Input: 3
+    Output: 5
+    Explanation:
+    Given n = 3, there are a total of 5 unique BST's:
+
+      1         3     3      2      1
+       \       /     /      / \      \
+        3     2     1      1   3      2
+       /     /       \                 \
+      2     1         2                 3
+  */
+      // 使用动态规划
+      var numTrees = function (n) {};
+    </script>
+
+    <script>
+      /*
+  97. Interleaving String
+  Example:
+
+    Input: s1 = "aabcc", s2 = "dbbca", s3 = "aadbbcbcac"
+    Output: true
+  */
+      var isInterleave = function (s1, s2, s3) {
+        if (s1.length + s2.length != s3.length) {
+          return false;
+        } else {
+          let arr = Array(s1.length + 1)
+            .fill(0)
+            .map((it) => Array(s2.length + 1));
+          let getRe = function (i1, i2, index) {
+            if (index == s3.length) {
+              return true;
+            } else if (index < s3.length) {
+              let re = false;
+              if (s1[i1] == s3[index]) {
+                if (arr[i1 + 1][i2] == undefined) {
+                  arr[i1 + 1][i2] = getRe(i1 + 1, i2, index + 1);
+                }
+                re = re || arr[i1 + 1][i2];
+              }
+              if (!re && s2[i2] == s3[index]) {
+                if (arr[i1][i2 + 1] == undefined) {
+                  arr[i1][i2 + 1] = getRe(i1, i2 + 1, index + 1);
+                }
+                re = re || arr[i1][i2 + 1];
+              }
+              return re;
+            }
+          };
+          return getRe(0, 0, 0);
+        }
+      };
+
+      var isInterleave = function (s1, s2, s3) {
+        if (s1.length + s2.length != s3.length) {
+          return false;
+        }
+        var judgeFun = function (i, j, k, obj) {
+          if (k == s3.length) {
+            return true;
+          } else {
+            if (s1[i] != s3[k] && s2[j] != s3[k]) {
+              return false;
+            } else {
+              var flag = false;
+              var key1 = i + 1 + ":" + j + ":" + (k + 1);
+              var key2 = i + ":" + (j + 1) + ":" + (k + 1);
+              if (s1[i] == s3[k]) {
+                if (!(key1 in obj)) {
+                  obj[key1] = judgeFun(i + 1, j, k + 1, obj);
+                }
+                flag = flag || obj[key1];
+              }
+              if (s2[j] == s3[k]) {
+                if (!(key2 in obj)) {
+                  obj[key2] = judgeFun(i, j + 1, k + 1, obj);
+                }
+                flag = flag || obj[key2];
+              }
+              return flag;
+            }
+          }
+        };
+        return judgeFun(0, 0, 0, {});
+      };
+    </script>
+
+    <script>
+      /*
+  98. Validate Binary Search Tree
+  Example:
+
+        2
+       / \
+      1   3
+
+    Input: [2,1,3]
+    Output: true
+  */
+      var isValidBST = function (root) {
+        let last = null;
+        let getRe = function (node = root) {
+          if (node) {
+            let re = true;
+            re = re && getRe(node.left);
+            re = re && (last == null || node.val > last);
+            last = node.val;
+            re = re && getRe(node.right);
+            return re;
+          } else {
+            return true;
+          }
+        };
+        return getRe();
+      };
+    </script>
+
+    <script>
+      /*
+  99. Recover Binary Search Tree
+  Example:
+
+    Input: [3,1,4,null,null,2]
+
+      3
+     / \
+    1   4
+       /
+      2
+
+    Output: [2,1,4,null,null,3]
+
+      2
+     / \
+    1   4
+       /
+      3
+  */
+      var recoverTree = function (root) {};
+    </script>
+
+    <script>
+      /*
+  100. Same Tree
+  Example:
+
+    Input:     1         1
+              / \       / \
+             2   3     2   3
+
+            [1,2,3],   [1,2,3]
+
+    Output: true
+  */
+      var isSameTree = function (p, q) {
+        let getRe = function (t1, t2) {
+          if (!t1 && !t2) {
+            return true;
+          } else if ((!t1 && t2) || (t1 && !t2)) {
+            return false;
+          } else {
+            return (
+              t1.val == t2.val &&
+              getRe(t1.left, t2.left) &&
+              getRe(t1.right, t2.right)
+            );
+          }
+        };
+        return getRe(p, q);
+      };
+    </script>
+  </head>
+
+  <body></body>
+</html>

@@ -3341,12 +3341,14 @@
             if (i === 0 && j === 0) {
               arr[i][j] = 1;
             } else {
-              arr[i][j] = (i - 1 >= 0 ? arr[i - 1][j] : 0) + (j - 1 >= 0 ? arr[i][j - 1] : 0)
+              arr[i][j] =
+                (i - 1 >= 0 ? arr[i - 1][j] : 0) +
+                (j - 1 >= 0 ? arr[i][j - 1] : 0);
             }
           }
         }
 
-        return arr[m-1][n-1];
+        return arr[m - 1][n - 1];
       };
     </script>
 
@@ -3589,7 +3591,7 @@
         return toTop(0, {}, {});
       };
 
-      // 典型的递归问题
+      // 典型的递归问题，需要这么想 到达位置i 要么是从i - 1 上去， 要么是从i - 2 上去  所以结果就是i - 1 + i - 2
     </script>
 
     <script>
@@ -3635,7 +3637,53 @@
         exention -> exection (replace 'n' with 'c')
         exection -> execution (insert 'u')
       */
-      var minDistance = function (word1, word2) {};
+
+      /*
+      根据思路
+        对于两个位置的字符比较
+        如果相同跳到下一个
+        如果不同
+          插入一个新的
+          替换当前这个
+          删除当前这个
+          
+      本质上来说和之前字符串匹配是一样的方式
+      */
+      var minDistance = function (word1, word2) {
+        const getRe = (s1, s2, obj) => {
+          let key = s1 + ":" + s2;
+          if (key in obj) {
+            return obj[key];
+          }
+          if (s1 === s2) {
+            obj[key] = 0;
+            return obj[key];
+          } else if (s1.length && s2.length) {
+            if (s1[0] === s2[0]) {
+              let re = getRe(s1.slice(1), s2.slice(1), obj);
+              obj[key] = re;
+              return re;
+            } else {
+              let re =
+                1 +
+                Math.min(
+                  getRe(s1.slice(1), s2.slice(1), obj),
+                  getRe(s2[0] + s1, s2, obj),
+                  getRe(s1.slice(1), s2, obj)
+                );
+              obj[key] = re;
+              return re;
+            }
+          } else {
+            // 两个字符串有一个消耗完了
+            obj[key] = Math.abs(s1.length - s2.length);
+            return obj[key];
+          }
+        };
+        let o = {};
+        let re = getRe(word1, word2, o);
+        return re;
+      };
     </script>
 
     <script>
@@ -3656,6 +3704,8 @@
           [0,3,1,0]
         ]
       */
+
+      // 有0存在转换整行数据为0
       var setZeroes = function (matrix) {
         var row = {},
           col = {};
@@ -3733,6 +3783,7 @@
       };
 
       // 使用二分搜索
+      // 先找出目标数字在第几行  再在当前行使用二分搜索
       var searchMatrix = function (matrix, target) {
         if (!matrix.length) {
           return false;
@@ -3742,7 +3793,7 @@
           for (let i = 0; i < row; i++) {
             let start = 0;
             let end = col - 1;
-            if (matrix[i][end] >= target) {
+            if (matrix[i][0] <= target && matrix[i][end] >= target) {
               while (start <= end) {
                 let mid = ((start + end) / 2) | 0;
                 if (matrix[i][mid] == target) {
@@ -3797,6 +3848,7 @@
       */
 
       // 使用滑动窗口
+      // 滑动窗口的典型用法
       var minWindow = function (s, t) {
         let re = "";
         let obj = {};
@@ -3978,6 +4030,55 @@
             if (board[i][j] == word[0]) {
               re = re || getRe(0, i, j, {});
             }
+          }
+        }
+        return re;
+      };
+
+      var exist = function (board, word) {
+        const obj = {};
+        const getRe = (row, col, word, temp) => {
+          let key = row + ":" + col + ":" + word;
+          if (key in obj) {
+            return obj[key];
+          } else if (word === "") {
+            return true;
+          } else if (row < 0 || col < 0 || row === board.length || col === board[0].length) {
+            obj[key] = false;
+            return false;
+          } else {
+            temp[row + ":" + col] = 1;
+            if (board[row][col] === word[0]) {
+              // 本质上也是回溯
+              let re = false;
+              if (!temp[row + 1 + ":" + col]) {
+                re = re || getRe(row + 1, col, word.slice(1), temp);
+                temp[row + 1 + ":" + col] = 0;
+              }
+              if (!temp[row - 1 + ":" + col]) {
+                re = re || getRe(row - 1, col, word.slice(1), temp);
+                temp[row - 1 + ":" + col] = 0;
+              }
+              if (!temp[row + ':' + (col + 1)]) {
+                re = re || getRe(row, col + 1, word.slice(1), temp);
+                temp[row + ':' + (col + 1)] = 0;
+              }
+              if (!temp[row + ':' + (col - 1)]) {
+                re = re || getRe(row, col - 1, word.slice(1), temp);
+                temp[row + ':' + (col - 1)] = 0;
+              }
+              obj[key] = re;
+              return re;
+            } else {
+              obj[key] = false;
+              return false;
+            }
+          }
+        };
+        let re = false;
+        for (let i = 0; i < board.length; i++) {
+          for (let j = 0; j < board[0].length; j++) {
+            re = re || getRe(i, j, word, {});
           }
         }
         return re;

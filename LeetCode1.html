@@ -84,6 +84,9 @@
       };
 
       // 使用原生的链表
+      /**
+       * 传入两个链表，得到一个链表  按照顺序计算
+       */
       var addTwoNumbers = function (l1, l2) {
         let add = 0;
         let currentNode = null;
@@ -151,14 +154,19 @@
           let left = 0;
           let right = 0;
           let re = 0;
+          // 只用了一个对象
           while (right < s.length) {
+            // 双指针  当前右指针的值已经存在数组中  说明又重复的了
             if (s[right] in obj && obj[s[right]] >= left) {
+              // 前一个还没有重复，更新最大值
               re = Math.max(re, right - left);
+              // 找到重复的值  更新左指针到跳过重复的值为至
               while (left < right && s[left] != s[right]) {
                 left++;
               }
               left++;
             }
+            // 更新右指针
             obj[s[right]] = right;
             right++;
             if (right == s.length) {
@@ -685,6 +693,7 @@
           } else {
             temp = height[start++];
           }
+          // temp 选中较小的一端内容
           arr.push(temp * (end - start + 1));
         }
         return Math.max(...arr);
@@ -3206,7 +3215,7 @@
         return re;
       };
 
-      // 使用回溯
+      // 使用回溯  直接使用回溯应该不合适
       var getPermutation = function (n, k) {
         let flag = true;
         let re = "";
@@ -3247,6 +3256,8 @@
         rotate 3 steps to the right: 0->1->2->NULL
         rotate 4 steps to the right: 2->0->1->NULL
       */
+
+      // 获取链表长度，使用反转次数对链表长度取余
       var rotateRight = function (head, k) {
         let getLen = function (node) {
           if (node) {
@@ -3392,6 +3403,25 @@
         };
         return getRe();
       };
+
+      // 动态规划
+      var uniquePathsWithObstacles = function (obstacleGrid) {
+        const row = obstacleGrid.length;
+        const col = obstacleGrid[0].length;
+        const arr = Array(row)
+          .fill(0)
+          .map((_) => Array(col).fill(0));
+        arr[0][0] = 1;
+        for (let i = 0; i < row; i++) {
+          for (let j = 0; j < col; j++) {
+            if (i !== 0 || j !== 0) {
+              arr[i][j] = ((i - 1 >= 0 && obstacleGrid[i - 1][j] == 0) ? arr[i - 1][j] : 0) + ((j - 1 >= 0 && obstacleGrid[i][j - 1] == 0) ? arr[i][j - 1] : 0)
+            }
+          }
+        }
+        return arr[row - 1][col - 1];
+      };
+
     </script>
 
     <script>
@@ -3591,7 +3621,7 @@
         return toTop(0, {}, {});
       };
 
-      // 典型的递归问题，需要这么想 到达位置i 要么是从i - 1 上去， 要么是从i - 2 上去  所以结果就是i - 1 + i - 2
+      // 典型的递归问题，需要这么想 到达位置i 要么是从i - 1 上去， 要么是从i - 2 上去  所以结果就是(i - 1) + (i - 2)
     </script>
 
     <script>
@@ -4043,10 +4073,16 @@
             return obj[key];
           } else if (word === "") {
             return true;
-          } else if (row < 0 || col < 0 || row === board.length || col === board[0].length) {
+          } else if (
+            row < 0 ||
+            col < 0 ||
+            row === board.length ||
+            col === board[0].length
+          ) {
             obj[key] = false;
             return false;
           } else {
+            // 标记当前资源，递归是不会再次进入这里
             temp[row + ":" + col] = 1;
             if (board[row][col] === word[0]) {
               // 本质上也是回溯
@@ -4059,13 +4095,13 @@
                 re = re || getRe(row - 1, col, word.slice(1), temp);
                 temp[row - 1 + ":" + col] = 0;
               }
-              if (!temp[row + ':' + (col + 1)]) {
+              if (!temp[row + ":" + (col + 1)]) {
                 re = re || getRe(row, col + 1, word.slice(1), temp);
-                temp[row + ':' + (col + 1)] = 0;
+                temp[row + ":" + (col + 1)] = 0;
               }
-              if (!temp[row + ':' + (col - 1)]) {
+              if (!temp[row + ":" + (col - 1)]) {
                 re = re || getRe(row, col - 1, word.slice(1), temp);
-                temp[row + ':' + (col - 1)] = 0;
+                temp[row + ":" + (col - 1)] = 0;
               }
               obj[key] = re;
               return re;
@@ -4269,6 +4305,7 @@
         Output: 1->2->2->4->3->5
       */
 
+      // 将链表分为两部分，小于目标值的放在前面，大于目标值的放在后面
       var partition = function (head, x) {
         var smallLi = new ListNode(-1);
         var headTemp = smallLi,
@@ -4314,8 +4351,8 @@
             arr[i] = arr[i - 1];
           }
         };
-        var i = 0,
-          j = 0;
+        let i = 0;
+        let j = 0;
         while (j < n) {
           if (i >= m) {
             nums1[i] = nums2[j];
@@ -4355,6 +4392,9 @@
         11 - 3
         01 - 1
       */
+      
+      // todo ----
+
       // 使用规律
       var grayCode = function (n) {
         let arr = [0];

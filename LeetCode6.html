@@ -920,6 +920,38 @@
 
     <script>
       /*
+      547. Number of Provinces
+      Input: isConnected = [[1,0,0],[0,1,0],[0,0,1]]
+      Output: 3
+
+      深搜题目   和之前遇到的其他的类似
+      每一层就是当前这个位置和其他位置是否是朋友关系
+      */
+      var findCircleNum = function (isConnected) {
+        let arr = Array(isConnected.length).fill(false);
+        let re = 0;
+        const dfs = (row) => {
+          row.forEach((it, i) => {
+            if (!arr[i] && it) {
+              arr[i] = true;
+              dfs(isConnected[i]);
+            }
+          });
+        };
+        arr.forEach((it, i) => {
+          // 当前位置还是孤立的  从当前位置开始  进行深搜  标记出所有的朋友节点
+          if (!it) {
+            re++;
+            arr[i] = true;
+            dfs(isConnected[i]);
+          }
+        });
+        return re;
+      };
+    </script>
+
+    <script>
+      /*
       551. Student Attendance Record I
       Example:
         Input: "PPALLP"
@@ -948,7 +980,65 @@
         "PP" , "AP", "PA", "LP", "PL", "AL", "LA", "LL"
         Only "AA" won't be regarded as rewardable owing to more than one absent times.
       */
+      // 动态规划
+      /*
+      A 最多一个
+      LLL 不能连续三个
+      P 任意
+      1:  A L P
+      2:  AL AP LA LL LP PA PL PP
+      3:  ALL 
+      */
       var checkRecord = function (n) {};
+    </script>
+
+    <script>
+      /*
+      553. Optimal Division
+      Example:
+        Input: nums = [1000,100,10,2]
+        Output: "1000/(100/10/2)"
+        Explanation:
+        1000/(100/10/2) = 1000/((100/10)/2) = 200
+        However, the bold parenthesis in "1000/((100/10)/2)" are redundant, since they don't influence the operation priority. So you should return "1000/(100/10/2)".
+        Other cases:
+        1000/(100/10)/2 = 50
+        1000/(100/(10/2)) = 50
+        1000/100/10/2 = 0.5
+        1000/100/(10/2) = 2
+      */
+      var optimalDivision = function (nums) {
+        if (nums.length > 2) {
+          return nums.slice(0, 1) + "/(" + nums.slice(1).join("/") + ")";
+        } else if (nums.length > 1) {
+          return nums.join("/");
+        } else {
+          return String(nums[0]);
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      554. Brick Wall
+
+      Input: wall = [[1,2,2,1],[3,1,2],[1,3,2],[2,4],[3,1,2],[1,3,1,1]]
+      Output: 2
+      */
+      var leastBricks = function (wall) {
+        let re = {};
+        let max = "";
+        const newWall = wall.map((it) => {
+          let temp = 0;
+          for (let i = 0; i < it.length - 1; i++) {
+            temp += it[i];
+            re[temp] = re[temp] ? re[temp] + 1 : 1;
+            max = re[max] > re[temp] ? max : temp;
+          }
+        });
+        return wall.length - (re[max] ? re[max] : 0);
+      };
+      console.log(leastBricks([[1], [1], [1]]));
     </script>
 
     <script>
@@ -962,6 +1052,7 @@
       var nextGreaterElement = function (n) {
         let arr = String(n).split("");
         let point;
+        // 判断当前数字的排序  如果是完全降序  则不存在结果
         for (let i = arr.length - 1; i >= 1; i--) {
           if (arr[i] > arr[i - 1]) {
             point = i - 1;

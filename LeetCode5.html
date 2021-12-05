@@ -2312,6 +2312,37 @@
 
     <script>
       /*
+      495. Teemo Attacking
+      Example:
+
+        Input: timeSeries = [1,2], duration = 2
+        Output: 3
+        Explanation: Teemo's attacks on Ashe go as follows:
+        - At second 1, Teemo attacks, and Ashe is poisoned for seconds 1 and 2.
+        - At second 2 however, Teemo attacks again and resets the poison timer. Ashe is poisoned for seconds 2 and 3.
+        Ashe is poisoned for seconds 1, 2, and 3, which is 3 seconds in total.
+      */
+      var findPoisonedDuration = function (timeSeries, duration) {
+        // 升序排列
+        timeSeries.sort((a, b) => (a - b > 0 ? 1 : -1));
+        let end = 0;
+        let re = 0;
+        timeSeries.forEach((i) => {
+          if (i >= end) {
+            re += duration;
+          } else {
+            re += duration - (end - i);
+          }
+          end = i + duration;
+        });
+        return re;
+      };
+      console.log(findPoisonedDuration([1, 4], 2))
+      console.log(findPoisonedDuration([1, 2], 2))
+    </script>
+
+    <script>
+      /*
       498. Diagonal Traverse
       Example:
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LeetCode题解</title>
+    <script src="./List.js"></script>
+    <script>
+      /*
+      609. Find Duplicate File in System
+      Input: paths = ["root/a 1.txt(abcd) 2.txt(efgh)","root/c 3.txt(abcd)","root/c/d 4.txt(efgh)","root 4.txt(efgh)"]
+      Output: [["root/a/2.txt","root/c/d/4.txt","root/4.txt"],["root/a/1.txt","root/c/3.txt"]]
+      */
+      var findDuplicate = function (paths) {
+        let re = {};
+        let reg = /([^(]*)\((.*)\)/;
+        paths.forEach((path) => {
+          const [aPath, ...resFiles] = path.split(" ");
+          resFiles
+            .map((it) => it.trim())
+            .forEach((file) => {
+              const res = reg.exec(file);
+              const fileName = res[1];
+              const content = res[2];
+              re[content] = re[content] || [];
+              re[content].push(aPath + "/" + fileName);
+            });
+        });
+        return Object.values(re).filter((it) => it.length > 1);
+      };
+    </script>
+
+    <script>
+      /*
+      611. Valid Triangle Number
+      Example 1:
+
+        Input: nums = [2,2,3,4]
+        Output: 3
+        Explanation: Valid combinations are: 
+        2,3,4 (using the first 2)
+        2,3,4 (using the second 2)
+        2,2,3
+
+      从中间的数开始 左边辐射 右边辐射
+      */
+      var triangleNumber = function (nums) {
+        let re = 0;
+        let arr = [];
+        nums.sort();
+        for (let i = 1; i < nums.length - 2; i++) {
+          let flag = true;
+          let start = i - 1;
+          let end = i + 1;
+          for (let s = start; s >= 0; s--) {
+            for (let e = end; e < nums.length; e++) {
+              let n1 = nums[s];
+              let n2 = nums[i];
+              let n3 = nums[e];
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body></body>
+</html>

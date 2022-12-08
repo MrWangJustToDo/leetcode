@@ -16,10 +16,16 @@
     */
       var removeInvalidParentheses = function (s) {
         let re = [];
+        let minWidth = 0;
         let getRe = function (left, right, temp, index) {
           if (index == s.length) {
             if (left == right) {
-              re.push(temp);
+              if (temp.length >= minWidth) {
+                if (temp.length > minWidth) {
+                  minWidth = temp.length;
+                }
+                re.push(temp);
+              }
             }
           } else {
             while (index < s.length && s[index] != "(" && s[index] != ")") {
@@ -55,6 +61,7 @@
         getRe(0, 0, "", 0);
         return re;
       };
+      console.log(removeInvalidParentheses("(a)())()"));
     </script>
 
     <script>
@@ -304,6 +311,13 @@
 
     <script>
       /*
+      310. Minimum Height Trees
+      从给定的点生成树，输出树的顶点
+      */
+    </script>
+
+    <script>
+      /*
     313. Super Ugly Number
     Example:
 
@@ -332,6 +346,48 @@
           }
         }
         return temp[n - 1];
+      };
+    </script>
+
+    <script>
+      /*
+      316. Remove Duplicate Letters
+      Example 1:
+
+      Input: s = "bcabc"
+      Output: "abc"
+      */
+      /*
+      stack: []
+      首先记录下所有的字母出现的次数，再次开始循环
+      如果当前字母看过了 跳过
+      没看过 看下当前字母和stack中最后的字母比较字典大小如果 
+        大  说明字典顺序可以 设置当前字母已经看过
+        小  判断栈中最后的字母后续还会不会出现，如果会  出栈，设置没有看过，再次比较栈顶
+                                            如果不会，没办法了，设置但那给钱看过了  继续
+      */
+      var removeDuplicateLetters = function (s) {
+        const countMap = {};
+        const visitedMap = {};
+        const stack = [];
+        for (let i = 0; i < s.length; i++) {
+          countMap[s[i]] = (countMap[s[i]] || 0) + 1;
+        }
+        for (let i = 0; i < s.length; i++) {
+          countMap[s[i]]--;
+          if (visitedMap[s[i]]) continue;
+          while (
+            stack.length &&
+            s[i] < stack[stack.length - 1] &&
+            countMap[stack[stack.length - 1]]
+          ) {
+            visitedMap[stack[stack.length - 1]] = false;
+            stack.pop();
+          }
+          visitedMap[s[i]] = true;
+          stack.push(s[i]);
+        }
+        return stack.join('');
       };
     </script>
 
@@ -990,6 +1046,29 @@
         let arr = Object.keys(obj);
         arr.sort((o1, o2) => obj[o2] - obj[o1]);
         return arr.slice(0, k);
+      };
+    </script>
+
+    <script>
+      /*
+      371. Sum of Two Integers
+      Example 1:
+
+        Input: a = 1, b = 2
+        Output: 3
+      */
+      /*
+      10 + 20
+      两个数字进行异或，将得到没有进位的加值。还可以通过与运算得到进位信息，再将得到的两个数重复操作，最终就可以得到结果
+      */
+      var getSum = function (a, b) {
+        let sum = a;
+        while (b !== 0) {
+          sum = a ^ b;
+          b = (a & b) << 1; // 进位信息需要左移一位
+          a = sum;
+        }
+        return sum;
       };
     </script>
 

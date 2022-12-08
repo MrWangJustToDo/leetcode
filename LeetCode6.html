@@ -791,7 +791,38 @@
         Input: ["23:59","00:00"]
         Output: 1
       */
-      var findMinDifference = function (timePoints) {};
+      var findMinDifference = function (timePoints) {
+        // 先排序，再按照大小左右两个相互进行计算
+        const timeArray = Array.from(new Set(timePoints.sort()));
+        if (timeArray.length !== timePoints.length) return 0;
+        // 得到两个时间的差值，第一个时间小，第二个时间大
+        const diff = (time1, time2) => {
+          let time1Array = time1.split(":").map(Number);
+          let time2Array = time2.split(":").map(Number);
+          let h = time2Array[0] - time1Array[0];
+          let m = time2Array[1] + 60 * h - time1Array[1];
+          return m;
+        };
+        return Math.min(
+          ...timeArray.map((it, index) => {
+            if (index === timeArray.length - 1) {
+              return diff(
+                it,
+                timeArray[0]
+                  .split(":")
+                  .map(Number)
+                  .map((i, index) => {
+                    if (index === 0) return i + 24;
+                    return i;
+                  })
+                  .join(":")
+              );
+            } else {
+              return diff(it, timeArray[index + 1]);
+            }
+          })
+        );
+      };
     </script>
 
     <script>

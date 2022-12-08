@@ -1828,6 +1828,31 @@
 
     <script>
       /*
+      274. H-Index
+
+      Example 1:
+
+        Input: citations = [3,0,6,1,5]
+        Output: 3
+        Explanation: [3,0,6,1,5] means the researcher has 5 papers in total and each of them had received 3, 0, 6, 1, 5 citations respectively.
+                    Since the researcher has 3 papers with at least 3 citations each and the remaining two with no more than 3 citations each, their h-index is 3.
+
+      论文引用h-index，计数排序
+
+      1、将其发表的所有SCI论文按被引次数从高到低排序；2、从前往后查找排序后的列表，直到某篇论文的序号大于该论文被引次数。所得序号减一即为H指数。
+      */
+      var hIndex = function (citations) {
+        citations.sort((a, b) => (b > a ? 1 : -1));
+        for (let i = 0; i < citations.length; i++) {
+          if (i >= citations[i]) return i;
+        }
+        return citations.length;
+      };
+      console.log(hIndex([1, 3, 1]));
+    </script>
+
+    <script>
+      /*
     278. First Bad Version
     Example:
 
@@ -2068,8 +2093,36 @@
       Explanation: If there are 4 stones in the heap, then you will never win the game;
                    No matter 1, 2, or 3 stones you remove, the last stone will always be 
                    removed by your friend.
+      // 动态规划
     */
-      var canWinNim = function (n) {};
+      var canWinNim = function (n) {
+        const cacheMe = {};
+        const cacheOther = {};
+        const subJudge = (n, isMe) => {
+          if (n <= 3) return isMe;
+          if (isMe) {
+            if (cacheMe[n] !== undefined) return cacheMe[n];
+            let last = false;
+            last =
+              subJudge(n - 1, !isMe) ||
+              subJudge(n - 2, !isMe) ||
+              subJudge(n - 3, !isMe);
+            cacheMe[n] = last;
+            return last;
+          } else {
+            if (cacheOther[n] !== undefined) return cacheOther[n];
+            let last = true;
+            last =
+              subJudge(n - 1, !isMe) &&
+              subJudge(n - 2, !isMe) &&
+              subJudge(n - 3, !isMe);
+            cacheOther[n] = last;
+            return last;
+          }
+        };
+        return subJudge(n, true);
+      };
+      console.log(canWinNim(140));
     </script>
 
     <script>

@@ -645,6 +645,54 @@
 
     <script>
       /*
+      417. Pacific Atlantic Water Flow
+      能够到两边海域的点，动态规划
+      */
+      var pacificAtlantic = function (heights) {
+        const pacificMap = [];
+        const atlanticMap = [];
+        heights.forEach((item) => {
+          pacificMap.push([]);
+          atlanticMap.push([]);
+        });
+        const generateMap = (i, j, map, pre) => {
+          if (
+            i < 0 ||
+            i >= heights.length ||
+            j < 0 ||
+            j >= heights[0].length ||
+            map[i][j] ||
+            heights[i][j] < pre
+          )
+            return;
+          map[i][j] = true;
+          generateMap(i - 1, j, map, heights[i][j]);
+          generateMap(i + 1, j, map, heights[i][j]);
+          generateMap(i, j - 1, map, heights[i][j]);
+          generateMap(i, j + 1, map, heights[i][j]);
+        };
+        for (let i = 0; i < heights.length; i++) {
+          generateMap(i, 0, pacificMap, -Infinity);
+          generateMap(i, heights[0].length - 1, atlanticMap, -Infinity);
+        }
+        for (let j = 0; j < heights[0].length; j++) {
+          generateMap(0, j, pacificMap, -Infinity);
+          generateMap(heights.length - 1, j, atlanticMap, -Infinity);
+        }
+        const res = [];
+        for (let i = 0; i < heights.length; i++) {
+          for (let j = 0; j < heights[0].length; j++) {
+            if (pacificMap[i][j] && atlanticMap[i][j]) {
+              res.push([i, j]);
+            }
+          }
+        }
+        return res;
+      };
+    </script>
+
+    <script>
+      /*
       419. Battleships in a Board
       Example:
 
@@ -881,15 +929,15 @@
 
     <script>
       /*
-    433. Minimum Genetic Mutation
-    Example:
+      433. Minimum Genetic Mutation
+      Example:
 
-      start: "AACCGGTT"
-      end:   "AAACGGTA"
-      bank: ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
+        start: "AACCGGTT"
+        end:   "AAACGGTA"
+        bank: ["AACCGGTA", "AACCGCTA", "AAACGGTA"]
 
-      return: 2
-    */
+        return: 2
+      */
       var minMutation = function (start, end, bank) {
         let arr = Array(bank.length);
         let judeg = function (str1, str2) {
@@ -931,6 +979,62 @@
           }
         }
         return -1;
+      };
+
+      // 计算有效突变到end的最短次数
+      var minMutation = function (start, end, bank) {
+        // 每一个阶段的尝试需要和上一个阶段的状态分离
+        let flag = false;
+        bank.forEach((item, index) => {
+          if (item === end) {
+            flag = true;
+          }
+        });
+
+        let map = { [start]: 1 };
+
+        const judge = (str1, str2) => {
+          let length = 0;
+          for (let i = 0; i < str1.length; i++) {
+            if (str1[i] !== str2[i]) {
+              if (length < 1) {
+                length++;
+              } else {
+                return false;
+              }
+            }
+          }
+          if (length === 1) {
+            return true;
+          }
+          return false;
+        };
+
+        const run = (map, currentStart) => {
+          let min = Infinity;
+          // 每一次尝试应该是一个单独的状态   不然其他路径就走不到了
+          for (let i = 0; i < bank.length; i++) {
+            // 没有达到过当前位置并且和现在突变的差值为1
+            if (!map[bank[i]] && judge(currentStart, bank[i])) {
+              map[bank[i]] = 1;
+              if (bank[i] === end) {
+                min = 0;
+              } else {
+                min = Math.min(min, run({ ...map }, bank[i]));
+              }
+            }
+          }
+          return min + 1;
+        };
+
+        // 基因库中存在结果
+        if (flag) {
+          let re = run({ ...map }, start);
+          if (re === Infinity) return -1;
+          return re;
+        } else {
+          return -1;
+        }
       };
     </script>
 
@@ -2185,6 +2289,34 @@
 
     <script>
       /*
+      481. Magical String
+
+        Share
+        A magical string s consists of only '1' and '2' and obeys the following rules:
+
+        The string s is magical because concatenating the number of contiguous occurrences of characters '1' and '2' generates the string s itself.
+        The first few elements of s is s = "1221121221221121122……". If we group the consecutive 1's and 2's in s, it will be "1 22 11 2 1 22 1 22 11 2 11 22 ......" and the occurrences of 1's or 2's in each group are "1 2 2 1 1 2 1 2 2 1 2 2 ......". You can see that the occurrence sequence is s itself.
+
+        Given an integer n, return the number of 1's in the first n number in the magical string s.
+
+        Example 1:
+
+          Input: n = 6
+          Output: 3
+          Explanation: The first 6 elements of magical string s is "122112" and it contains three 1's, so return 3.
+      */
+      var magicalString = function (n) {
+        function getStr(str, p) {
+          if (str.length === n) return str;
+          if (str.length === 0) {
+            str = 1;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
       486. Predict the Winner
       Example:
 
@@ -2337,8 +2469,8 @@
         });
         return re;
       };
-      console.log(findPoisonedDuration([1, 4], 2))
-      console.log(findPoisonedDuration([1, 2], 2))
+      console.log(findPoisonedDuration([1, 4], 2));
+      console.log(findPoisonedDuration([1, 2], 2));
     </script>
 
     <script>

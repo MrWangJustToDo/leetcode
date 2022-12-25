@@ -63,6 +63,72 @@
         }
       };
     </script>
+
+    <script>
+      /*
+      617. Merge Two Binary Trees
+      You are given two binary trees root1 and root2.
+
+      Imagine that when you put one of them to cover the other, some nodes of the two trees are overlapped while the others are not. You need to merge the two trees into a new binary tree. The merge rule is that if two nodes overlap, then sum node values up as the new value of the merged node. Otherwise, the NOT null node will be used as the node of the new tree.
+
+      Return the merged tree.
+
+      Note: The merging process must start from the root nodes of both trees.
+      */
+      var mergeTrees = function (root1, root2) {
+        const merge = (node1, node2) => {
+          if (node1 || node2) {
+            return new TreeNode(
+              (node1?.val || 0) + (node2?.val || 0),
+              merge(node1?.left, node2?.left),
+              merge(node1?.right, node2?.right)
+            );
+          }
+        };
+        return merge(root1, root2);
+      };
+    </script>
+
+    <script>
+      /*
+      623. Add One Row to Tree
+
+      Given the root of a binary tree and two integers val and depth, add a row of nodes with value val at the given depth depth.
+
+      Note that the root node is at depth 1.
+
+      The adding rule is:
+
+      Given the integer depth, for each not null tree node cur at the depth depth - 1, create two tree nodes with value val as cur's left subtree root and right subtree root.
+      cur's original left subtree should be the left subtree of the new left subtree root.
+      cur's original right subtree should be the right subtree of the new right subtree root.
+      If depth == 1 that means there is no depth depth - 1 at all, then create a tree node with value val as the new root of the whole original tree, and the original tree is the new root's left subtree.
+      */
+      var addOneRow = function (root, val, depth) {
+        const move = (node, depth, isLeft) => {
+          if (depth === 1) {
+            if (isLeft) {
+              return new TreeNode(val, node);
+            } else {
+              return new TreeNode(val, null, node);
+            }
+          } else {
+            if (node) {
+              return new TreeNode(
+                node.val,
+                move(node.left, depth - 1, true),
+                move(node.right, depth - 1, false)
+              );
+            }
+          }
+        };
+        if (depth === 1) {
+          return new TreeNode(val, root);
+        } else {
+          return move(root, depth);
+        }
+      };
+    </script>
   </head>
   <body></body>
 </html>

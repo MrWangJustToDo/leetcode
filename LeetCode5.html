@@ -2306,12 +2306,29 @@
           Explanation: The first 6 elements of magical string s is "122112" and it contains three 1's, so return 3.
       */
       var magicalString = function (n) {
-        function getStr(str, p) {
-          if (str.length === n) return str;
-          if (str.length === 0) {
-            str = 1;
+        const generateString = (n) => {
+          if (n <= 0) return 0;
+          if (n <= 3) return 1;
+          // let s = '122';
+          let s = [1, 2, 2];
+          // c point
+          let h = 2;
+          // next
+          let next = 1;
+          let re = 1;
+          while (s.length < n) {
+            for (let i = 0; i < s[h]; i++) {
+              s.push(next);
+              if (next === 1 && s.length <= n) {
+                re++;
+              }
+            }
+            next ^= 3;
+            h++;
           }
-        }
+          return re;
+        };
+        return generateString(n);
       };
     </script>
 

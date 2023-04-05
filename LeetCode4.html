@@ -8,60 +8,59 @@
 
     <script>
       /*
-    301. Remove Invalid Parentheses
-    Example:
+      301. Remove Invalid Parentheses
+      Example:
 
-      Input: "(a)())()"
-      Output: ["(a)()()", "(a())()"]
-    */
+        Input: "(a)())()"
+        Output: ["(a)()()", "(a())()"]
+      */
       var removeInvalidParentheses = function (s) {
-        let re = [];
-        let minWidth = 0;
-        let getRe = function (left, right, temp, index) {
-          if (index == s.length) {
-            if (left == right) {
-              if (temp.length >= minWidth) {
-                if (temp.length > minWidth) {
-                  minWidth = temp.length;
-                }
-                re.push(temp);
+        let set = new Set();
+        let max = 0;
+        // 回溯
+        const arr = s.split("");
+        const loop = (stack, index, temp) => {
+          if (index >= arr.length) {
+            if (stack.length === 0) {
+              if (max > temp.length) {
+                return;
               }
+              max = Math.max(max, temp.length);
+              set.add(temp);
             }
           } else {
-            while (index < s.length && s[index] != "(" && s[index] != ")") {
-              temp += s[index];
-              index++;
-            }
-            if (left == right) {
-              if (temp != "") re.push(temp);
-              while (index < s.length && s[index] != "(") {
-                index++;
-              }
-              if (index < s.length) {
-                getRe(left + 1, right, temp + s[index], index + 1);
-              }
+            const current = arr[index];
+            // del
+            loop(stack, index + 1, temp);
+            // add
+            if (
+              stack.length &&
+              stack[stack.length - 1] === "(" &&
+              current === ")"
+            ) {
+              const t = stack.pop();
+              loop(stack, index + 1, temp + current);
+              stack.push(t);
             } else {
-              let t = index;
-              while (t < s.length && s[t] != "(") {
-                t++;
-              }
-              if (t < s.length) {
-                getRe(left + 1, right, temp + s[t], t + 1);
-              }
-              t = index;
-              while (t < s.length && s[t] != ")") {
-                t++;
-              }
-              if (t < s.length) {
-                getRe(left, right + 1, temp + s[t], t + 1);
+              if (current === ")" || current === "(") {
+                stack.push(current);
+                loop(stack, index + 1, temp + current);
+                stack.pop();
+              } else {
+                loop(stack, index + 1, temp + current);
               }
             }
           }
         };
-        getRe(0, 0, "", 0);
+        loop([], 0, "");
+
+        let re = Array.from(set);
+
+        re = re.filter((l) => l.length >= max);
+
         return re;
       };
-      console.log(removeInvalidParentheses("(a)())()"));
+      // console.log(removeInvalidParentheses("(a)())()"));
     </script>
 
     <script>
@@ -387,7 +386,7 @@
           visitedMap[s[i]] = true;
           stack.push(s[i]);
         }
-        return stack.join('');
+        return stack.join("");
       };
     </script>
 
@@ -1701,7 +1700,7 @@
 
         this.getList = function () {};
       }
-      // 使用递归下沉
+      // 使用递归下降
       var deserialize = function (s) {
         let i = 0;
         let getRe = function (str) {

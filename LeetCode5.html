@@ -8,13 +8,58 @@
 
     <script>
       /*
-    401. Binary Watch
-    Example:
+      401. Binary Watch
+      Example:
 
-      Input: n = 1
-      Return: ["1:00", "2:00", "4:00", "8:00", "0:01", "0:02", "0:04", "0:08", "0:16", "0:32"]
-    */
-      var readBinaryWatch = function (num) {};
+        Input: n = 1
+        Return: ["1:00", "2:00", "4:00", "8:00", "0:01", "0:02", "0:04", "0:08", "0:16", "0:32"]
+      
+      二进制表，给出点亮的灯珠，返回所有可能的时间值
+      */
+      var readBinaryWatch = function (num) {
+        if (num >= 9) return [];
+        const hours = [0, 0, 0, 0];
+        const minutes = [0, 0, 0, 0, 0, 0];
+        const map = {};
+        const re = [];
+        const loop = (totalHour, totalMinute, last) => {
+          if (totalHour > 12 || totalMinute > 60) return;
+          if (last === 0) {
+            if (totalHour <= 11 && totalMinute <= 59) {
+              const result = `${Number(totalHour)}:${
+                String(totalMinute).length < 2 ? "0" + totalMinute : totalMinute
+              }`;
+              if (!map[result]) {
+                map[result] = true;
+                re.push(result);
+              }
+            } else if (totalHour == 12 && totalMinute == 0) {
+              // const result = `12:00`;
+              // if (!map[result]) {
+              //   map[result] = true;
+              //   re.push(result);
+              // }
+            }
+          } else {
+            for (let i = 0; i < minutes.length; i++) {
+              if (!minutes[i]) {
+                minutes[i] = 1;
+                loop(totalHour, totalMinute + (1 << i), last - 1);
+                minutes[i] = 0;
+              }
+            }
+            for (let i = 0; i < hours.length; i++) {
+              if (!hours[i]) {
+                hours[i] = 1;
+                loop(totalHour + (1 << i), totalMinute, last - 1);
+                hours[i] = 0;
+              }
+            }
+          }
+        };
+        loop(0, 0, num);
+        return re;
+      };
     </script>
 
     <script>
@@ -804,6 +849,18 @@
 
     <script>
       /*
+      423. Reconstruct Original Digits from English
+
+      Given a string s containing an out-of-order English representation of digits 0-9, return the digits in ascending order.
+
+      升序返回字符串中所包含的所有英文数字
+      */
+
+      var originalDigits = function (s) {};
+    </script>
+
+    <script>
+      /*
       424. Longest Repeating Character Replacement
       Example:
 
@@ -1410,6 +1467,30 @@
             return tempL;
           } else {
             return re;
+          }
+        }
+      };
+    </script>
+
+    <script>
+      /*
+      447. Number of Boomerangs
+
+      You are given n points in the plane that are all distinct, where points[i] = [xi, yi]. A boomerang is a tuple of points (i, j, k) such that the distance between i and j equals the distance between i and k (the order of the tuple matters).
+
+      Return the number of boomerangs.
+
+      找出距离相同的三个点的组合
+      */
+      var numberOfBoomerangs = function (points) {
+        const arr = [];
+        for (let i = 0; i < points.length - 1; i++) {
+          arr[i] = arr[i] || [];
+          for (let j = i + 1; j < points.length; j++) {
+            const p1 = points[i];
+            const p2 = points[j];
+            const x = p1[1] - p2[1];
+            const y = p1[0] - p2[0];
           }
         }
       };
